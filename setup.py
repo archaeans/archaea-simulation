@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(
-    name='archaea_simulation',
+    name='archaea-simulation',
     packages=['archaea', 'archaea.simulation_objects'],
     version='1.0.0',
     license='Apache 2.0',
