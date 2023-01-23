@@ -1,2 +1,3 @@
-# archaea-simulation
-Wrapper definitions for simulations
+# Archaea Simulation
+
+Wrapper definitions for simulation tools.
