@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='archaea-simulation',
-    packages=['archaea', 'archaea.simulation_objects'],
+    packages=['archaea_simulation.simulation_objects'],
     version='1.0.0',
     license='Apache 2.0',
     description='Wrapper definitions for simulation tools.',
