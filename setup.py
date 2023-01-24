@@ -2,15 +2,15 @@ from distutils.core import setup
 
 setup(
     name='archaea-simulation',
-    packages=['archaea_simulation.simulation_objects'],
-    version='1.0.0',
+    packages=['archaea-simulation.simulation_objects'],
+    version='1.0.1',
     license='Apache 2.0',
     description='Wrapper definitions for simulation tools.',
     readme='README.md',
     author='Oğuzhan Koral',
     author_email='oguzhankoral@gmail.com',
     url='https://github.com/archaeans/archaea-simulation',
-    download_url='https://github.com/archaeans/archaea-simulation/archive/refs/tags/1.0.0.tar.gz',
+    download_url='https://github.com/archaeans/archaea-simulation/archive/refs/tags/1.0.1.tar.gz',
     keywords=['geometry', 'simulation'],
     install_requires=[
         'archaea'

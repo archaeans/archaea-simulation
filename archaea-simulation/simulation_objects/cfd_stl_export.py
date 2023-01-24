@@ -1,6 +1,6 @@
 import sys
 import getopt
-from archaea.simulation_objects.domain import Domain
+from .domain import Domain
 from archaea.geometry.point3d import Point3d
 
 
