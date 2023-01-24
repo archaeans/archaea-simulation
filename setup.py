@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name='archaea-simulation',
     packages=setuptools.find_packages(),
-    version='1.0.3',
+    version='1.0.4',
     license='Apache 2.0',
     description='Wrapper definitions for simulation tools.',
     long_description=long_description,
@@ -15,7 +15,7 @@ setuptools.setup(
     author='Oğuzhan Koral',
     author_email='oguzhankoral@gmail.com',
     url='https://github.com/archaeans/archaea-simulation',
-    download_url='https://github.com/archaeans/archaea-simulation/archive/refs/tags/1.0.3.tar.gz',
+    download_url='https://github.com/archaeans/archaea-simulation/archive/refs/tags/1.0.4.tar.gz',
     keywords=['geometry', 'simulation'],
     install_requires=[
         'archaea'
