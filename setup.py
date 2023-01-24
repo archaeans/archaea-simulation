@@ -1,16 +1,21 @@
-from distutils.core import setup
+import setuptools
 
-setup(
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+setuptools.setup(
     name='archaea-simulation',
-    packages=['archaea-simulation.simulation_objects'],
-    version='1.0.1',
+    packages=setuptools.find_packages(),
+    version='1.0.2',
     license='Apache 2.0',
     description='Wrapper definitions for simulation tools.',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     readme='README.md',
     author='Oğuzhan Koral',
     author_email='oguzhankoral@gmail.com',
     url='https://github.com/archaeans/archaea-simulation',
-    download_url='https://github.com/archaeans/archaea-simulation/archive/refs/tags/1.0.1.tar.gz',
+    download_url='https://github.com/archaeans/archaea-simulation/archive/refs/tags/1.0.2.tar.gz',
     keywords=['geometry', 'simulation'],
     install_requires=[
         'archaea'
