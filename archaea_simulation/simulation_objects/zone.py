@@ -1,7 +1,7 @@
 from archaea.geometry.face import Face
 from archaea.geometry.vector3d import Vector3d
-from .wall import Wall
-from .wall_type import WallType
+from archaea_simulation.simulation_objects.wall import Wall
+from archaea_simulation.simulation_objects.wall_type import WallType
 
 
 class Zone:

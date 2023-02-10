@@ -2,8 +2,8 @@ from archaea.geometry.point3d import Point3d
 from archaea.geometry.vector3d import Vector3d
 from archaea.geometry.loop import Loop
 from archaea.geometry.face import Face
-from .wall import Wall
-from .zone import Zone
+from archaea_simulation.simulation_objects.wall import Wall
+from archaea_simulation.simulation_objects.zone import Zone
 
 
 class Domain(Zone):
