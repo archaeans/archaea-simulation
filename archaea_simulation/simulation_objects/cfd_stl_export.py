@@ -1,13 +1,14 @@
 import sys
 import getopt
 from archaea_simulation.simulation_objects.domain import Domain
+from archaea_simulation.simulation_objects.courtyard_building import CourtyardBuilding
 from archaea.geometry.point3d import Point3d
 
 
 def cfd_stl_export(argv):
     # Default values
-    arg_domain_width = 100.0
-    arg_domain_depth = 50.0
+    arg_domain_width = 50.0
+    arg_domain_depth = 100.0
     arg_domain_height = 50.0
     arg_number_of_storeys = 1
     arg_number_of_rooms = 3
@@ -109,7 +110,33 @@ def cfd_stl_export(argv):
         elif opt in ("-dwh", "--door-window-height"):
             arg_room_door_height = arg
 
-    domain = Domain(Point3d.origin(), arg_domain_width, arg_domain_depth, arg_domain_height)
+    courtyard_building = CourtyardBuilding(
+        Point3d.origin(),
+        int(arg_number_of_storeys),
+        int(arg_number_of_rooms),
+        float(arg_courtyard_width),
+        float(arg_room_width),
+        float(arg_room_depth),
+        float(arg_room_height),
+        float(arg_room_wall_thickness),
+        bool(arg_room_window_existence),
+        float(arg_room_window_width),
+        float(arg_room_window_height),
+        bool(arg_room_door_existence),
+        float(arg_room_door_width),
+        float(arg_room_door_height)
+    )
+
+    domain = Domain(Point3d.origin(),
+                    arg_domain_width,       # x
+                    arg_domain_depth,       # y
+                    arg_domain_height       # z
+                    )
+
+    for zone in courtyard_building.zones:
+        domain.add_zone(zone)
+
+    domain.export_domain_to_stl()
 
 
 if __name__ == "__main__":

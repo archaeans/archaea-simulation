@@ -35,13 +35,15 @@ class Zone:
             walls.append(wall)
         self.walls = walls
 
-    def create_solid_faces(self):
-        all_walls = self.walls
-        all_walls.append(self.floor.reverse())
-        all_walls.append(self.ceiling.reverse())
+    def all_surfaces(self):
+        all_surfaces = self.walls
+        all_surfaces.append(self.floor.reverse())
+        all_surfaces.append(self.ceiling.reverse())
+        return all_surfaces
 
+    def create_solid_faces(self):
         faces = []
-        for wall in all_walls:
+        for wall in self.all_surfaces():
             faces += wall.create_solid_faces()
 
         return faces

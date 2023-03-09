@@ -2,6 +2,7 @@ from archaea.geometry.point3d import Point3d
 from archaea.geometry.vector3d import Vector3d
 from archaea.geometry.loop import Loop
 from archaea.geometry.face import Face
+from archaea.geometry.mesh import Mesh
 from archaea_simulation.simulation_objects.wall import Wall
 from archaea_simulation.simulation_objects.zone import Zone
 
@@ -16,7 +17,13 @@ class Domain(Zone):
     context: "list[Wall]"
     openings: "list[Wall]"
 
-    def __init__(self, center: Point3d, x: float, y: float, z: float, zones=None, context=None):
+    def __init__(self,
+                 center: Point3d,
+                 x: float,
+                 y: float,
+                 z: float,
+                 zones=None,
+                 context=None):
         if context is None:
             context = []
         if zones is None:
@@ -56,4 +63,10 @@ class Domain(Zone):
             faces += zone.create_solid_faces()
 
         return faces
+
+    def export_domain_to_stl(self):
+        mesh = Mesh()
+        walls = self.create_solid_faces()
+        mesh.add_from_faces(walls)
+        mesh.to_stl("", "test_domain_init")
 
