@@ -1,0 +1,69 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version	2.0;
+    format      ascii;
+    class       dictionary;
+    object      surfaceFeaturesDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+inlet
+{
+	surfaces
+	(
+		"inlet.stl"
+	);
+	
+	includedAngle	180;
+	
+	writeObj	yes;
+}
+
+outlet
+{
+	surfaces
+	(
+		"outlet.stl"
+	);
+	
+	includedAngle	180;
+	
+	writeObj	yes;
+}
+
+context
+{
+	surfaces
+	(
+		"context.stl"
+	);
+	
+	includedAngle	180;
+	
+	writeObj	yes;
+	
+	
+}
+
+sides
+{
+	surfaces
+	(
+		"sides.stl"
+	);
+	
+	includedAngle	180;
+	
+	writeObj	yes;
+}
+
+#includeEtc "caseDicts/surface/surfaceFeaturesDict.cfg"
+
+// ************************************************************************* //

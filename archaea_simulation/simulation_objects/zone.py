@@ -15,7 +15,7 @@ class Zone:
 
     def __init__(self, floor: Face, height, walls=None, wall_default_thickness=0.1):
         self.floor = Wall(floor.outer_loop, floor.inner_loops)
-        self.floor.update_wall_type(WallType.INNER)
+        self.floor.update_wall_type(WallType.OUTER)
         self.height = height
         self.wall_default_thickness = wall_default_thickness
         self.volume = self.floor.area * height
