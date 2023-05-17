@@ -69,7 +69,9 @@ class CourtyardBuilding:
 
         ground_loop_1 = Loop([p0, p3, p2, p1])
         ground_face_1 = Face(ground_loop_1)
-        ground_wall = Wall(ground_loop_1, [], wall_type=WallType.INNER)
+
+        # NOTE: If we want to open ground of storey 1, we should change wall_type to wall_type=WallType.INNER
+        ground_wall = Wall(ground_loop_1, [], wall_type=WallType.OUTER)
         ceiling_wall = Wall(ground_loop_1.move(Vector3d(0, 0, self.room_height)).reverse(), [], wall_type=WallType.OUTER)
 
         window_wall = self.create_window_wall(p0, p3)

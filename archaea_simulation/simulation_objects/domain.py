@@ -1,3 +1,8 @@
+import os
+import shutil
+import fileinput
+from pathlib import Path
+from distutils.dir_util import copy_tree as copytree
 from archaea.geometry.point3d import Point3d
 from archaea.geometry.vector3d import Vector3d
 from archaea.geometry.loop import Loop
@@ -64,9 +69,87 @@ class Domain(Zone):
 
         return faces
 
-    def export_domain_to_stl(self):
+    def create_context_faces(self):
+        faces = []
+        for zone in self.zones:
+            faces += zone.create_solid_faces()
+
+        return faces
+
+    def create_case(self, case_folder_path):
+        if os.path.exists(case_folder_path):
+            # Remove folder and files if any
+            shutil.rmtree(case_folder_path)
+        # Create file from scratch
+        os.mkdir(case_folder_path)
+        # Copy boilerplate case
+        boilerplate_case = os.path.join(Path(__file__).resolve().parents[1], 'case')
+        copytree(boilerplate_case, case_folder_path)
+        # Create path to create stl files
+        trisurface_path = os.path.join(case_folder_path, "constant", "triSurface")
+        self.update_block_mesh_dict(case_folder_path)
+
+        self.export_domain_to_stl(trisurface_path)
+
+    def update_block_mesh_dict(self, case_folder_path):
+        block_mesh_dict_path = os.path.join(case_folder_path, "system", "blockMeshDict")
+
+        cells = 'x\t{x};\n    y\t{y};\n    z\t{z};'.format(x=int(self.x), y=int(self.y), z=int(self.z))
+        vertices = '({x0}\t{y0}\t{z0})\n    ' \
+                   '({x1}\t{y1}\t{z1})\n    ' \
+                   '({x2}\t{y2}\t{z2})\n    ' \
+                   '({x3}\t{y3}\t{z3})\n    ' \
+                   '({x4}\t{y4}\t{z4})\n    ' \
+                   '({x5}\t{y5}\t{z5})\n    ' \
+                   '({x6}\t{y6}\t{z6})\n    ' \
+                   '({x7}\t{y7}\t{z7})\n    '.format(x0=-self.x/2, y0=-self.y/2, z0=0,
+                                                     x1=self.x/2, y1=-self.y/2, z1=0,
+                                                     x2=self.x/2, y2=self.y/2, z2=0,
+                                                     x3=-self.x/2, y3=self.y/2, z3=0,
+                                                     x4=-self.x/2, y4=-self.y/2, z4=self.z,
+                                                     x5=self.x/2, y5=-self.y/2, z5=self.z,
+                                                     x6=self.x/2, y6=self.y/2, z6=self.z,
+                                                     x7=-self.x/2, y7=self.y/2, z7=self.z,
+                                                     )
+
+        with fileinput.FileInput(block_mesh_dict_path, inplace=True) as file:
+            for line in file:
+                print(line.replace('// cells to replace', cells), end='')
+        with fileinput.FileInput(block_mesh_dict_path, inplace=True) as file:
+            for line in file:
+                print(line.replace('// vertices to replace', vertices), end='')
+
+    def export_domain_to_stl(self, path):
+        self.export_context_to_stl(path)
+        self.export_inlet_to_stl(path)
+        self.export_outlet_to_stl(path)
+        self.export_sides_to_stl(path)
+        self.export_all_to_single_stl(path)
+
+    def export_all_to_single_stl(self, path):
         mesh = Mesh()
         walls = self.create_solid_faces()
         mesh.add_from_faces(walls)
-        mesh.to_stl("", "test_domain_init")
+        mesh.to_stl(path, "combined")
+
+    def export_context_to_stl(self, path):
+        mesh = Mesh()
+        walls = self.create_context_faces()
+        mesh.add_from_faces(walls)
+        mesh.to_stl(path, "context")
+
+    def export_inlet_to_stl(self, path):
+        mesh = Mesh()
+        mesh.add_from_faces([self.walls[3]])
+        mesh.to_stl(path, "inlet")
+
+    def export_outlet_to_stl(self, path):
+        mesh = Mesh()
+        mesh.add_from_faces([self.walls[1]])
+        mesh.to_stl(path, "outlet")
+
+    def export_sides_to_stl(self, path):
+        mesh = Mesh()
+        mesh.add_from_faces([self.walls[0], self.walls[2], self.floor.reverse(), self.ceiling.reverse()])
+        mesh.to_stl(path, "sides")
 

@@ -1,12 +1,14 @@
 import sys
+import os
 import getopt
+from archaea.geometry.point3d import Point3d
 from archaea_simulation.simulation_objects.domain import Domain
 from archaea_simulation.simulation_objects.courtyard_building import CourtyardBuilding
-from archaea.geometry.point3d import Point3d
 
 
 def cfd_stl_export(argv):
     # Default values
+    arg_name = "test"
     arg_domain_width = 50.0
     arg_domain_depth = 100.0
     arg_domain_height = 50.0
@@ -27,6 +29,7 @@ def cfd_stl_export(argv):
     arg_help = "{0}\n\n" \
                "Welcome to stl exporter program for cfd calculations! \n" \
                "Use below flags to generate stl.\n" \
+               " -n\t--name                        <name>                    default: test\n" \
                " -dw\t--domain-width               <domain_width>            default: 100.0\n" \
                " -dd\t--domain-depth               <domain_depth>            default: 50.0\n" \
                " -dh\t--domain-height              <domain_height>           default: 50.0\n" \
@@ -45,8 +48,9 @@ def cfd_stl_export(argv):
                " -rdh\t--room-door-height          <room_door_height>         default: 2.0\n".format(argv[0])
 
     try:
-        opts, args = getopt.getopt(argv[1:], "hdw:dd:dh:nos:nor:cw:rw:rd:rh:rwt:rwe:rww:rwh:rde:rdw:rdh:",
+        opts, args = getopt.getopt(argv[1:], "n:hdw:dd:dh:nos:nor:cw:rw:rd:rh:rwt:rwe:rww:rwh:rde:rdw:rdh:",
                                    ["help",
+                                    "name=",
                                     "domain-width=",
                                     "domain-depth=",
                                     "domain-height=",
@@ -77,11 +81,13 @@ def cfd_stl_export(argv):
         if opt in ("-h", "--help"):
             print(arg_help)  # print the help message
             sys.exit(2)
+        elif opt in ("-n", "--name"):
+            arg_name = arg
         elif opt in ("-dw", "--domain-width"):
             arg_domain_width = arg
-        elif opt in ("-dd", "--domain_depth"):
+        elif opt in ("-dd", "--domain-depth"):
             arg_domain_depth = arg
-        elif opt in ("-dh", "--domain_height"):
+        elif opt in ("-dh", "--domain-height"):
             arg_domain_height = arg
         elif opt in ("-nos", "--number-of-storeys"):
             arg_number_of_storeys = arg
@@ -128,15 +134,21 @@ def cfd_stl_export(argv):
     )
 
     domain = Domain(Point3d.origin(),
-                    arg_domain_width,       # x
-                    arg_domain_depth,       # y
-                    arg_domain_height       # z
+                    float(arg_domain_width),       # x
+                    float(arg_domain_depth),       # y
+                    float(arg_domain_height)       # z
                     )
 
     for zone in courtyard_building.zones:
         domain.add_zone(zone)
 
-    domain.export_domain_to_stl()
+    foam_run = os.getenv('FOAM_RUN')
+    # TODO: check here foam_run exist or not
+    archaea_folder = os.path.join(foam_run, 'archaea')
+    if not os.path.exists(archaea_folder):
+        os.mkdir(archaea_folder)
+
+    domain.create_case(os.path.join(archaea_folder, arg_name))
 
 
 if __name__ == "__main__":
