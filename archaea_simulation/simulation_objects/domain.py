@@ -120,6 +120,8 @@ class Domain(Zone):
                 print(line.replace('// vertices to replace', vertices), end='')
 
     def export_domain_to_stl(self, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
         self.export_context_to_stl(path)
         self.export_inlet_to_stl(path)
         self.export_outlet_to_stl(path)

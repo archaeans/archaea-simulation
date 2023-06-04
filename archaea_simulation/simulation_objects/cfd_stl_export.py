@@ -3,6 +3,7 @@ import os
 import getopt
 from archaea.geometry.point3d import Point3d
 from archaea_simulation.simulation_objects.domain import Domain
+from archaea_simulation.utils.path import get_cfd_export_path
 from archaea_simulation.simulation_objects.courtyard_building import CourtyardBuilding
 
 
@@ -142,11 +143,9 @@ def cfd_stl_export(argv):
     for zone in courtyard_building.zones:
         domain.add_zone(zone)
 
-    foam_run = os.getenv('FOAM_RUN')
-    # TODO: check here foam_run exist or not
-    archaea_folder = os.path.join(foam_run, 'archaea')
+    archaea_folder = get_cfd_export_path()
     if not os.path.exists(archaea_folder):
-        os.mkdir(archaea_folder)
+        os.makedirs(archaea_folder)
 
     domain.create_case(os.path.join(archaea_folder, arg_name))
 
