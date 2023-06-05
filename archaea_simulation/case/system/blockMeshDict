@@ -44,7 +44,7 @@ boundary
         type patch;
         faces
         (
-            (0 3 7 4)
+            (0 4 5 1)
         );
     }
 
@@ -53,7 +53,7 @@ boundary
         type patch;
         faces
         (
-            (1 5 6 2)
+            (3 2 6 7)
         );
     }
 
@@ -71,8 +71,8 @@ boundary
         type symmetry;
         faces
         (
-            (0 4 5 1)
-            (3 2 6 7)
+            (0 3 7 4)
+            (1 5 6 2)
             (4 7 6 5)
         );
     }

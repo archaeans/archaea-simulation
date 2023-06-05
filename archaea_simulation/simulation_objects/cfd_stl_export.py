@@ -1,6 +1,8 @@
 import sys
 import os
 import getopt
+import subprocess
+import shutil
 from archaea.geometry.point3d import Point3d
 from archaea_simulation.simulation_objects.domain import Domain
 from archaea_simulation.utils.path import get_cfd_export_path
@@ -10,6 +12,7 @@ from archaea_simulation.simulation_objects.courtyard_building import CourtyardBu
 def cfd_stl_export(argv):
     # Default values
     arg_name = "test"
+    arg_exec = False
     arg_domain_width = 50.0
     arg_domain_depth = 100.0
     arg_domain_height = 50.0
@@ -31,6 +34,7 @@ def cfd_stl_export(argv):
                "Welcome to stl exporter program for cfd calculations! \n" \
                "Use below flags to generate stl.\n" \
                " -n\t--name                        <name>                    default: test\n" \
+               " -x\t--exec                        <exec>                    default: 0\n" \
                " -dw\t--domain-width               <domain_width>            default: 100.0\n" \
                " -dd\t--domain-depth               <domain_depth>            default: 50.0\n" \
                " -dh\t--domain-height              <domain_height>           default: 50.0\n" \
@@ -49,8 +53,9 @@ def cfd_stl_export(argv):
                " -rdh\t--room-door-height          <room_door_height>         default: 2.0\n".format(argv[0])
 
     try:
-        opts, args = getopt.getopt(argv[1:], "n:hdw:dd:dh:nos:nor:cw:rw:rd:rh:rwt:rwe:rww:rwh:rde:rdw:rdh:",
+        opts, args = getopt.getopt(argv[1:], "hxn:hdw:dd:dh:nos:nor:cw:rw:rd:rh:rwt:rwe:rww:rwh:rde:rdw:rdh:",
                                    ["help",
+                                    "exec",
                                     "name=",
                                     "domain-width=",
                                     "domain-depth=",
@@ -84,6 +89,8 @@ def cfd_stl_export(argv):
             sys.exit(2)
         elif opt in ("-n", "--name"):
             arg_name = arg
+        elif opt in ("-x", "--exec"):
+            arg_exec = True
         elif opt in ("-dw", "--domain-width"):
             arg_domain_width = arg
         elif opt in ("-dd", "--domain-depth"):
@@ -147,7 +154,15 @@ def cfd_stl_export(argv):
     if not os.path.exists(archaea_folder):
         os.makedirs(archaea_folder)
 
-    domain.create_case(os.path.join(archaea_folder, arg_name))
+    case_folder = os.path.join(archaea_folder, arg_name)
+    domain.create_case(case_folder)
+
+    if arg_exec:
+        cmd = os.path.join(case_folder, './Allrun')
+        pipefile = open('output', 'w')
+        retcode = subprocess.call(cmd, shell=True, stdout=pipefile)
+        pipefile.close()
+        os.remove('output')
 
 
 if __name__ == "__main__":
