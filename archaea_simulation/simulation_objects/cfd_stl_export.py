@@ -2,8 +2,14 @@ import sys
 import os
 import getopt
 import subprocess
-import shutil
 from archaea.geometry.point3d import Point3d
+
+from specklepy.api.client import Account, SpeckleClient
+from specklepy.api import operations
+from specklepy.api.credentials import get_default_account
+from specklepy.transports.server import ServerTransport
+from specklepy.objects.geometry import Mesh, Base
+
 from archaea_simulation.simulation_objects.domain import Domain
 from archaea_simulation.utils.path import get_cfd_export_path
 from archaea_simulation.simulation_objects.courtyard_building import CourtyardBuilding
@@ -141,6 +147,35 @@ def cfd_stl_export(argv):
         float(arg_room_door_height)
     )
 
+    # create and authenticate a client
+    token_path = os.path.join(os.path.expanduser('~'), '.speckle', 'token')
+    host_path = os.path.join(os.path.expanduser('~'), '.speckle', 'host')
+    token_file = open(token_path, "r")
+    host_file = open(host_path, "r")
+    token = token_file.read().replace('\n', '')
+    host = host_file.read().replace('\n', '')
+    client = SpeckleClient(host=host)
+    account = Account.from_token(token, host)
+    client.authenticate_with_account(account)
+
+
+    results = client.stream.search("Archaea Tests")
+    if not results:
+        new_stream_id = client.stream.create(name="Archaea Tests")
+
+    results = client.stream.search("Archaea Tests")
+    stream = results[0]
+
+    transport = ServerTransport(client=client, stream_id=stream.id)
+
+    branches = client.branch.list(stream.id)
+    is_openfoam_branch_exist = any(branch.name == "OpenFOAM" for branch in branches)
+
+    if not is_openfoam_branch_exist:
+        branch_id = client.branch.create(stream.id, "OpenFOAM", "Created by Archaea.")
+
+    branch = client.branch.get(stream.id, "OpenFOAM")
+
     domain = Domain(Point3d.origin(),
                     float(arg_domain_width),       # x
                     float(arg_domain_depth),       # y
@@ -149,6 +184,24 @@ def cfd_stl_export(argv):
 
     for zone in courtyard_building.zones:
         domain.add_zone(zone)
+
+    base = Base()
+    mesh = Mesh()
+    mesh.units = 'm'
+    archaea_mesh = domain.export_all_to_single_mesh()
+    mesh.vertices = [item for sublist in archaea_mesh.vertices for item in sublist]
+    mesh.faces = [item for sublist in archaea_mesh.polygons for item in [len(sublist)] + sublist]
+    base.data = [mesh]
+
+    obj_id = operations.send(base, [transport])
+
+    # now create a commit on that branch with your updated data!
+    commit_id = client.commit.create(
+        stream.id,
+        obj_id,
+        branch.name,
+        message="Sent from Archaea.",
+    )
 
     archaea_folder = get_cfd_export_path()
     if not os.path.exists(archaea_folder):

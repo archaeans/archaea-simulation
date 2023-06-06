@@ -128,6 +128,12 @@ class Domain(Zone):
         self.export_sides_to_stl(path)
         self.export_all_to_single_stl(path)
 
+    def export_all_to_single_mesh(self):
+        mesh = Mesh()
+        walls = self.create_solid_faces()
+        mesh.add_from_faces(walls)
+        return mesh
+
     def export_all_to_single_stl(self, path):
         mesh = Mesh()
         walls = self.create_solid_faces()
