@@ -4,12 +4,11 @@ import getopt
 import subprocess
 from archaea.geometry.point3d import Point3d
 
-from specklepy.api.client import Account, SpeckleClient
 from specklepy.api import operations
-from specklepy.api.credentials import get_default_account
 from specklepy.transports.server import ServerTransport
 from specklepy.objects.geometry import Mesh, Base
 
+from archaea_simulation.speckle.account import get_auth_speckle_client
 from archaea_simulation.simulation_objects.domain import Domain
 from archaea_simulation.utils.path import get_cfd_export_path
 from archaea_simulation.simulation_objects.courtyard_building import CourtyardBuilding
@@ -147,17 +146,8 @@ def cfd_stl_export(argv):
         float(arg_room_door_height)
     )
 
-    # create and authenticate a client
-    token_path = os.path.join(os.path.expanduser('~'), '.speckle', 'token')
-    host_path = os.path.join(os.path.expanduser('~'), '.speckle', 'host')
-    token_file = open(token_path, "r")
-    host_file = open(host_path, "r")
-    token = token_file.read().replace('\n', '')
-    host = host_file.read().replace('\n', '')
-    client = SpeckleClient(host=host)
-    account = Account.from_token(token, host)
-    client.authenticate_with_account(account)
-
+    # Get authorized speckle client
+    client = get_auth_speckle_client()
 
     results = client.stream.search("Archaea Tests")
     if not results:
@@ -201,6 +191,7 @@ def cfd_stl_export(argv):
         obj_id,
         branch.name,
         message="Sent from Archaea.",
+        source_application='Archaea'
     )
 
     archaea_folder = get_cfd_export_path()
