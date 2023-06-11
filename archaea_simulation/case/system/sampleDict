@@ -1,0 +1,51 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2012                                |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      sampleDict;
+}
+
+// *************************************************** //
+//  Definition of sample dictionaries                  //
+// *************************************************** //
+
+sampleDict
+{
+    type        sets;
+
+    libs        (fieldFunctionObjects);
+
+    sets
+    (
+        plane1
+    );
+
+    fields
+    (
+        U
+        Cx
+        Cy
+        Cz
+    );
+
+    sampleMode  cell;
+
+    plane1
+    {
+        type        plane;
+        basePoint   (0.0 0.0 1.2); // Coordinates of a point on the plane
+        normalVector (0.0 0.0 1.0); // Normal vector of the plane
+    }
+}
+
+// *************************************************** //
+

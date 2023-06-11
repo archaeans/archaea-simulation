@@ -49,6 +49,12 @@ runTimeModifiable true;
 
 functions
 {
+    // Sample function object
+    sample
+    {
+        type            sample;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+    }
 }
 
 // ************************************************************************* //

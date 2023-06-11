@@ -61,12 +61,18 @@ class Domain(Zone):
             self.floor.add_opening(zone.floor.wall_border.reverse())
 
     def create_solid_faces(self):
-        faces = [self.floor.reverse(), self.ceiling.reverse()]
-        faces += self.walls
+        return self.domain_faces() + self.domain_zone_faces()
 
+    def domain_zone_faces(self):
+        faces = []
         for zone in self.zones:
             faces += zone.create_solid_faces()
 
+        return faces
+
+    def domain_faces(self):
+        faces = [self.floor.reverse(), self.ceiling.reverse()]
+        faces += self.walls
         return faces
 
     def create_context_faces(self):
@@ -127,6 +133,23 @@ class Domain(Zone):
         self.export_outlet_to_stl(path)
         self.export_sides_to_stl(path)
         self.export_all_to_single_stl(path)
+
+    def export_domain_to_single_mesh(self):
+        mesh = Mesh()
+        walls = self.domain_faces()
+        mesh.add_from_faces(walls)
+        return mesh
+
+    def export_domain_ground_single_mesh(self):
+        mesh = Mesh()
+        mesh.add_from_faces([self.floor.reverse()])
+        return mesh
+
+    def export_zones_to_single_mesh(self):
+        mesh = Mesh()
+        walls = self.domain_zone_faces()
+        mesh.add_from_faces(walls, False)
+        return mesh
 
     def export_all_to_single_mesh(self):
         mesh = Mesh()

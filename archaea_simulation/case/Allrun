@@ -12,5 +12,7 @@ runApplication snappyHexMesh -overwrite
 runApplication $(getApplication)
 
 simpleFoam -postProcess -func writeCellCentres
+# simpleFoam -postProcess -func sample
+simpleFoam -postProcess -func cutPlaneSurface
 
 #------------------------------------------------------------------------------

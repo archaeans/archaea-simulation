@@ -2,6 +2,7 @@ import sys
 import os
 import getopt
 import subprocess
+import vtk
 from archaea.geometry.point3d import Point3d
 
 from specklepy.api import operations
@@ -9,6 +10,7 @@ from specklepy.transports.server import ServerTransport
 from specklepy.objects.geometry import Mesh, Base
 
 from archaea_simulation.speckle.account import get_auth_speckle_client
+from archaea_simulation.speckle.vtk_to_speckle import vtk_to_speckle
 from archaea_simulation.simulation_objects.domain import Domain
 from archaea_simulation.utils.path import get_cfd_export_path
 from archaea_simulation.simulation_objects.courtyard_building import CourtyardBuilding
@@ -175,24 +177,23 @@ def cfd_stl_export(argv):
     for zone in courtyard_building.zones:
         domain.add_zone(zone)
 
-    base = Base()
-    mesh = Mesh()
-    mesh.units = 'm'
-    archaea_mesh = domain.export_all_to_single_mesh()
-    mesh.vertices = [item for sublist in archaea_mesh.vertices for item in sublist]
-    mesh.faces = [item for sublist in archaea_mesh.polygons for item in [len(sublist)] + sublist]
-    base.data = [mesh]
+    base = Base(detachable={'Domain', 'Buildings', 'Results'})
+    domain_ground_mesh = Mesh()
+    domain_ground_mesh.units = 'm'
+    domain_ground_mesh.name = 'Ground'
+    archaea_domain_mesh = domain.export_domain_ground_single_mesh()
+    domain_ground_mesh.vertices = [item for sublist in archaea_domain_mesh.vertices for item in sublist]
+    domain_ground_mesh.faces = [item for sublist in archaea_domain_mesh.polygons for item in [len(sublist)] + sublist]
 
-    obj_id = operations.send(base, [transport])
+    zones_mesh = Mesh()
+    zones_mesh.units = 'm'
+    zones_mesh.name = 'Buildings'
+    archaea_zone_mesh = domain.export_zones_to_single_mesh()
+    zones_mesh.vertices = [item for sublist in archaea_zone_mesh.vertices for item in sublist]
+    zones_mesh.faces = [item for sublist in archaea_zone_mesh.polygons for item in [len(sublist)] + sublist]
 
-    # now create a commit on that branch with your updated data!
-    commit_id = client.commit.create(
-        stream.id,
-        obj_id,
-        branch.name,
-        message="Sent from Archaea.",
-        source_application='Archaea'
-    )
+    base.Domain = [domain_ground_mesh]
+    base.Buildings = [zones_mesh]
 
     archaea_folder = get_cfd_export_path()
     if not os.path.exists(archaea_folder):
@@ -207,6 +208,23 @@ def cfd_stl_export(argv):
         retcode = subprocess.call(cmd, shell=True, stdout=pipefile)
         pipefile.close()
         os.remove('output')
+
+    vtk_file = os.path.join(archaea_folder, 'test-for-speckle-vtk', 'postProcessing',
+                            'cutPlaneSurface', '400', 'U_cutPlane.vtk')
+
+    result_mesh = vtk_to_speckle(vtk_file)
+    base.Results = [result_mesh]
+
+    obj_id = operations.send(base, [transport])
+
+    # now create a commit on that branch with your updated data!
+    commit_id = client.commit.create(
+        stream.id,
+        obj_id,
+        branch.name,
+        message="Sent from Archaea.",
+        source_application='Archaea'
+    )
 
 
 if __name__ == "__main__":
