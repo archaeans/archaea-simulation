@@ -2,7 +2,6 @@ import sys
 import os
 import getopt
 import subprocess
-import vtk
 from archaea.geometry.point3d import Point3d
 
 from specklepy.api import operations
@@ -16,13 +15,13 @@ from archaea_simulation.utils.path import get_cfd_export_path
 from archaea_simulation.simulation_objects.courtyard_building import CourtyardBuilding
 
 
-def cfd_stl_export(argv):
+def run_cfd(argv):
     # Default values
     arg_name = "test"
     arg_exec = False
-    arg_domain_width = 50.0
-    arg_domain_depth = 100.0
-    arg_domain_height = 50.0
+    arg_domain_width = 25.0
+    arg_domain_depth = 25.0
+    arg_domain_height = 10.0
     arg_number_of_storeys = 1
     arg_number_of_rooms = 3
     arg_courtyard_width = 10.0
@@ -209,7 +208,7 @@ def cfd_stl_export(argv):
         pipefile.close()
         os.remove('output')
 
-    vtk_file = os.path.join(archaea_folder, 'test-for-speckle-vtk', 'postProcessing',
+    vtk_file = os.path.join(case_folder, 'postProcessing',
                             'cutPlaneSurface', '400', 'U_cutPlane.vtk')
 
     result_mesh = vtk_to_speckle(vtk_file)
@@ -228,4 +227,4 @@ def cfd_stl_export(argv):
 
 
 if __name__ == "__main__":
-    cfd_stl_export(sys.argv)
+    run_cfd(sys.argv)
