@@ -1,13 +1,14 @@
 import unittest
-from archaea.geometry.vector3d import Vector3d
-from archaea.geometry.point3d import Point3d
-from archaea.geometry.loop import Loop
+
 from archaea.geometry.face import Face
+from archaea.geometry.loop import Loop
 from archaea.geometry.mesh import Mesh
-from archaea_simulation.simulation_objects.wall import Wall
-from archaea_simulation.simulation_objects.zone import Zone
+from archaea.geometry.point3d import Point3d
+
 from archaea_simulation.simulation_objects.domain import Domain
+from archaea_simulation.simulation_objects.wall import Wall
 from archaea_simulation.simulation_objects.wall_type import WallType
+from archaea_simulation.simulation_objects.zone import Zone
 
 
 class Setup(unittest.TestLoader):
@@ -24,8 +25,10 @@ class Setup(unittest.TestLoader):
 
     ground_loop_1 = Loop([p0, p3, p2, p1])
     ground_face_1 = Face(ground_loop_1)
-    ground_wall_1 = Wall(ground_face_1.outer_loop, ground_face_1.inner_loops, wall_type=WallType.INNER)
+    ground_wall_1 = Wall(ground_face_1.outer_loop, ground_face_1.inner_loops, 
+                         wall_type=WallType.INNER)
 
+    zone_without_hole = Zone(ground_face_1, 3)
     zone = Zone(ground_face_1, 3)
 
     # outer wall
@@ -51,7 +54,8 @@ class Setup(unittest.TestLoader):
     outer_wall_loop = Loop([p4, p7, p6, p5])
     outer_wall_face = Face(outer_wall_loop, [outer_wall_hole_loop_window])
 
-    outer_wall_with_opening = Wall(outer_wall_face.outer_loop, outer_wall_face.inner_loops)
+    outer_wall_with_opening = Wall(outer_wall_face.outer_loop, 
+                                   outer_wall_face.inner_loops)
 
     zone.walls[3].add_opening(outer_wall_hole_loop_window)
     zone.walls[1].add_opening(outer_wall_hole_loop_door)
@@ -68,3 +72,17 @@ class TestDomain(unittest.TestCase):
         mesh.add_from_faces(walls)
         mesh.to_stl("", "test_domain_init")
 
+    def test_domain_from_meshes(self):
+        # Arrange
+        mesh = Mesh()
+        faces = Setup.zone_without_hole.create_solid_faces()
+        for face in faces:
+            mesh.add_polygon(face.outer_loop.points[:-1])
+
+        # Act
+        domain_mesh = Mesh()
+        domain = Domain.from_meshes([mesh])
+        walls = domain.create_solid_faces()
+        domain_mesh.add_from_faces(walls)
+        domain_mesh.to_stl("", "test_domain_from_meshes")
+        

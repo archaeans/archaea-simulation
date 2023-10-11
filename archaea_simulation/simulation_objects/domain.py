@@ -1,15 +1,17 @@
-import os
-import shutil
 import fileinput
 import itertools
-from pathlib import Path
+import os
+import shutil
 from distutils.dir_util import copy_tree as copytree
+from pathlib import Path
+
 from archaea.geometry.bounding_box import BoundingBox
+from archaea.geometry.face import Face
+from archaea.geometry.loop import Loop
+from archaea.geometry.mesh import Mesh
 from archaea.geometry.point3d import Point3d
 from archaea.geometry.vector3d import Vector3d
-from archaea.geometry.loop import Loop
-from archaea.geometry.face import Face
-from archaea.geometry.mesh import Mesh
+
 from archaea_simulation.simulation_objects.wall import Wall
 from archaea_simulation.simulation_objects.zone import Zone
 
@@ -23,6 +25,7 @@ class Domain(Zone):
     zones: "list[Zone]"
     context: "list[Wall]"
     openings: "list[Wall]"
+    MIN_DOMAIN_SIZE = 10
 
     def __init__(self,
                  center: Point3d,
@@ -46,12 +49,14 @@ class Domain(Zone):
         self.ground = self.floor
 
     @classmethod
-    def from_mesh(cls, meshes: "list[Mesh]"):
+    def from_meshes(cls, meshes: "list[Mesh]"):
         mesh_vertices = [mesh.vertices for mesh in meshes]
         vertices = list(itertools.chain.from_iterable(mesh_vertices))
         bbox = BoundingBox.from_points(vertices)
-
-        return cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z))
+        x_dist = abs(bbox.max.x - bbox.min.x)
+        y_dist = abs(bbox.max.y - bbox.min.y)
+        z_dist = abs(bbox.max.z - bbox.min.z)
+        return cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z), x_dist * 5, y_dist * 5, z_dist * 3)
 
     def init_ground(self) -> Face:
         c = self.center
@@ -99,7 +104,7 @@ class Domain(Zone):
         # Create file from scratch
         os.mkdir(case_folder_path)
         # Copy boilerplate case
-        boilerplate_case = os.path.join(Path(__file__).resolve().parents[1], 'case')
+        boilerplate_case = os.path.join(Path(__file__).resolve().parents[1], 'cfd/case')
         copytree(boilerplate_case, case_folder_path)
         # Create path to create stl files
         trisurface_path = os.path.join(case_folder_path, "constant", "triSurface")

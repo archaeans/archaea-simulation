@@ -19,10 +19,12 @@ class Wall(Face):
         self.has_opening = len(self.openings) > 0
         self.thickness = thickness
 
-    def create_solid_faces(self):
+    def create_solid_faces(self, include_inner_offset: bool):
         faces = []
         if self.wall_type == WallType.OUTER:
             faces.append(self)
+            if not include_inner_offset:
+                return faces
         inner_wall = self.offset(self.thickness).move(self.plane.normal.scale(self.thickness * -1))
         faces.append(inner_wall)
         for inner_loop in self.inner_loops:

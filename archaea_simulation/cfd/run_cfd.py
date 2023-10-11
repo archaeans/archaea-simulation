@@ -157,7 +157,7 @@ def run_cfd(argv):
     results = client.stream.search("Archaea Tests")
     stream = results[0]
 
-    transport = ServerTransport(client=client, stream_id=stream.id)
+    transport = ServerTransport(stream_id=stream.id, client=client)
 
     branches = client.branch.list(stream.id)
     is_openfoam_branch_exist = any(branch.name == "OpenFOAM" for branch in branches)

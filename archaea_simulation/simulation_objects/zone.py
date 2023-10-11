@@ -40,10 +40,13 @@ class Zone:
         all_surfaces.append(self.floor.reverse())
         all_surfaces.append(self.ceiling.reverse())
         return all_surfaces
+    
+    def has_opening(self):
+        return True in [any(wall.openings) for wall in self.walls]
 
-    def create_solid_faces(self):
+    def create_solid_faces(self) -> "list[Face]":
         faces = []
         for wall in self.all_surfaces():
-            faces += wall.create_solid_faces()
+            faces += wall.create_solid_faces(self.has_opening())
 
         return faces
