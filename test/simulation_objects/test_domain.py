@@ -82,6 +82,8 @@ class TestDomain(unittest.TestCase):
         # Act
         domain_mesh = Mesh()
         domain = Domain.from_meshes([mesh])
+        # TODO: make sure exported correctly!
+        # domain.export_context_meshes_to_stl("")
         walls = domain.create_solid_faces()
         domain_mesh.add_from_faces(walls)
         domain_mesh.to_stl("", "test_domain_from_meshes")

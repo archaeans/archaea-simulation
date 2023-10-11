@@ -24,6 +24,7 @@ class Domain(Zone):
     z: float
     zones: "list[Zone]"
     context: "list[Wall]"
+    context_mesh: "list[Mesh]"
     openings: "list[Wall]"
     MIN_DOMAIN_SIZE = 10
 
@@ -56,7 +57,9 @@ class Domain(Zone):
         x_dist = abs(bbox.max.x - bbox.min.x)
         y_dist = abs(bbox.max.y - bbox.min.y)
         z_dist = abs(bbox.max.z - bbox.min.z)
-        return cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z), x_dist * 5, y_dist * 5, z_dist * 3)
+        domain = cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z), x_dist * 5, y_dist * 5, z_dist * 3)
+        domain.context_mesh = meshes
+        return domain
 
     def init_ground(self) -> Face:
         c = self.center
@@ -183,6 +186,16 @@ class Domain(Zone):
         walls = self.create_context_faces()
         mesh.add_from_faces(walls)
         mesh.to_stl(path, "context")
+
+    def export_context_meshes_to_stl(self, path):
+        mesh = Mesh()
+        for context_m in self.context_mesh:
+            for polygon in context_m.polygons:
+                vertices = []
+                for index in polygon:
+                    vertices.append(context_m.vertices[index])
+                mesh.add_polygon(vertices)
+        mesh.to_stl(path, "context_meshes")
 
     def export_inlet_to_stl(self, path):
         mesh = Mesh()
