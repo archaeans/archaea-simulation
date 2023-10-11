@@ -1,8 +1,10 @@
 import os
 import shutil
 import fileinput
+import itertools
 from pathlib import Path
 from distutils.dir_util import copy_tree as copytree
+from archaea.geometry.bounding_box import BoundingBox
 from archaea.geometry.point3d import Point3d
 from archaea.geometry.vector3d import Vector3d
 from archaea.geometry.loop import Loop
@@ -42,6 +44,14 @@ class Domain(Zone):
         ground = self.init_ground()
         super().__init__(ground, self.z, wall_default_thickness=0)
         self.ground = self.floor
+
+    @classmethod
+    def from_mesh(cls, meshes: "list[Mesh]"):
+        mesh_vertices = [mesh.vertices for mesh in meshes]
+        vertices = list(itertools.chain.from_iterable(mesh_vertices))
+        bbox = BoundingBox.from_points(vertices)
+
+        return cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z))
 
     def init_ground(self) -> Face:
         c = self.center
