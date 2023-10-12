@@ -151,6 +151,7 @@ class Domain(Zone):
         self.export_outlet_to_stl(path)
         self.export_sides_to_stl(path)
         self.export_all_to_single_stl(path)
+        self.export_context_meshes_to_stl(path)
 
     def export_domain_to_single_mesh(self):
         mesh = Mesh()
