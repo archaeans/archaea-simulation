@@ -38,11 +38,11 @@ outlet
 	writeObj	yes;
 }
 
-context
+zones
 {
 	surfaces
 	(
-		"context.stl"
+		"zones.stl"
 	);
 	
 	includedAngle	180;
@@ -57,6 +57,18 @@ sides
 	surfaces
 	(
 		"sides.stl"
+	);
+	
+	includedAngle	180;
+	
+	writeObj	yes;
+}
+
+context_meshes
+{
+	surfaces
+	(
+		"context_meshes.stl"
 	);
 	
 	includedAngle	180;

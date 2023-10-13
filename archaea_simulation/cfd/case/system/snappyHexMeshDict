@@ -21,11 +21,9 @@ addLayers       off;
 
 geometry
 {
-    context
-    {
-        type triSurfaceMesh;
-        file "context.stl";
-    }
+    // zones to replace
+
+    // context meshes to replace
 
     // refinementBox
     // {
@@ -40,19 +38,16 @@ castellatedMeshControls
 {
     features
     (
-      { 
-      	file  "context.eMesh"; 
-      	level 1; 
-      }
+        // zones features to replace
+
+        // context meshes features to replace
     );
 
     refinementSurfaces
     {
-        context
-        {
-            level (3 3);
-            patchInfo { type wall; }
-        }
+        // zones refinementSurfaces to replace
+
+        // context refinementSurfaces features to replace
     }
 
     refinementRegions

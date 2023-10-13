@@ -14,6 +14,7 @@ from archaea.geometry.vector3d import Vector3d
 
 from archaea_simulation.simulation_objects.wall import Wall
 from archaea_simulation.simulation_objects.zone import Zone
+from archaea_simulation.cfd.utils.snappyHexMesh import snappy_hex_mesh_geometry, snappy_hex_mesh_refinementSurfaces, snappy_hex_mesh_features
 
 
 class Domain(Zone):
@@ -22,9 +23,11 @@ class Domain(Zone):
     x: float
     y: float
     z: float
+    wind_direction: float
+    wind_speed: float
     zones: "list[Zone]"
     context: "list[Wall]"
-    context_mesh: "list[Mesh]"
+    context_meshes: "list[Mesh]"
     openings: "list[Wall]"
     MIN_DOMAIN_SIZE = 10
 
@@ -33,16 +36,21 @@ class Domain(Zone):
                  x: float,
                  y: float,
                  z: float,
+                 wind_speed: float = 10,
+                 wind_direction: float = 0,
                  zones=None,
                  context=None):
         if context is None:
             context = []
+            self.context_meshes = []
         if zones is None:
             zones = []
         self.center = center
         self.x = x
         self.y = y
         self.z = z
+        self.wind_speed = wind_speed
+        self.wind_direction = wind_direction
         self.zones = zones
         self.context = context
         ground = self.init_ground()
@@ -58,7 +66,7 @@ class Domain(Zone):
         y_dist = abs(bbox.max.y - bbox.min.y)
         z_dist = abs(bbox.max.z - bbox.min.z)
         domain = cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z), x_dist * 5, y_dist * 5, z_dist * 3)
-        domain.context_mesh = meshes
+        domain.context_meshes = meshes
         return domain
 
     def init_ground(self) -> Face:
@@ -111,9 +119,46 @@ class Domain(Zone):
         copytree(boilerplate_case, case_folder_path)
         # Create path to create stl files
         trisurface_path = os.path.join(case_folder_path, "constant", "triSurface")
-        self.update_block_mesh_dict(case_folder_path)
-
         self.export_domain_to_stl(trisurface_path)
+        self.update_block_mesh_dict(case_folder_path)
+        self.update_snappy_hex_mesh_dict(case_folder_path)
+
+
+    def update_snappy_hex_mesh_dict(self, case_folder_path):
+        """Snappy hex mesh dict defines which meshes will be considered
+        while volume meshes creating.
+
+        Args:
+            case_folder_path: where dict file will be searched.
+        """  # noqa: D205
+        snappy_hex_mesh_dict_path = os.path.join(case_folder_path, "system", "snappyHexMeshDict")
+        if any(self.zones):
+            zones_entry = snappy_hex_mesh_geometry("zones", "zones")
+            zones_features_entry = snappy_hex_mesh_features("zones", 1)
+            zones_refinement_entry = snappy_hex_mesh_refinementSurfaces("zones")
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// zones to replace', zones_entry), end='')
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// zones features to replace', zones_features_entry), end='')
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// zones refinementSurfaces to replace', zones_refinement_entry), end='')
+        if any(self.context_meshes):
+            context_meshes_entry = snappy_hex_mesh_geometry("context_meshes", "context_meshes")
+            context_meshes_features_entry = snappy_hex_mesh_features("context_meshes", 1)
+            context_meshes_refinement_entry = snappy_hex_mesh_refinementSurfaces("context_meshes")
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// context meshes to replace', context_meshes_entry), end='')
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// context meshes features to replace', context_meshes_features_entry), end='')
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// context meshes refinementSurfaces to replace', context_meshes_refinement_entry), end='')
+        
 
     def update_block_mesh_dict(self, case_folder_path):
         block_mesh_dict_path = os.path.join(case_folder_path, "system", "blockMeshDict")
@@ -146,7 +191,7 @@ class Domain(Zone):
     def export_domain_to_stl(self, path):
         if not os.path.exists(path):
             os.makedirs(path)
-        self.export_context_to_stl(path)
+        self.export_zones_to_stl(path)
         self.export_inlet_to_stl(path)
         self.export_outlet_to_stl(path)
         self.export_sides_to_stl(path)
@@ -182,21 +227,23 @@ class Domain(Zone):
         mesh.add_from_faces(walls)
         mesh.to_stl(path, "combined")
 
-    def export_context_to_stl(self, path):
-        mesh = Mesh()
-        walls = self.create_context_faces()
-        mesh.add_from_faces(walls)
-        mesh.to_stl(path, "context")
+    def export_zones_to_stl(self, path):
+        if any(self.zones):
+            mesh = Mesh()
+            walls = self.create_context_faces()
+            mesh.add_from_faces(walls)
+            mesh.to_stl(path, "zones")
 
     def export_context_meshes_to_stl(self, path):
-        mesh = Mesh()
-        for context_m in self.context_mesh:
-            for polygon in context_m.polygons:
-                vertices = []
-                for index in polygon:
-                    vertices.append(context_m.vertices[index])
-                mesh.add_polygon(vertices)
-        mesh.to_stl(path, "context_meshes")
+        if any(self.context_meshes):
+            mesh = Mesh()
+            for context_m in self.context_meshes:
+                for polygon in context_m.polygons:
+                    vertices = []
+                    for index in polygon:
+                        vertices.append(context_m.vertices[index])
+                    mesh.add_polygon(vertices)
+            mesh.to_stl(path, "context_meshes")
 
     def export_inlet_to_stl(self, path):
         mesh = Mesh()
