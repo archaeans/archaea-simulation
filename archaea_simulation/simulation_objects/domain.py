@@ -132,7 +132,7 @@ class Domain(Zone):
                 for line in file:
                     print(line.replace('// zones to replace', zones_entry), end='')
         if any(self.context_meshes):
-            context_meshes_entry = surface_features_entry("zones")
+            context_meshes_entry = surface_features_entry("context_meshes")
             with fileinput.FileInput(surface_features_dict_path, inplace=True) as file:
                 for line in file:
                     print(line.replace('// context meshes to replace', context_meshes_entry), end='')
