@@ -47,7 +47,7 @@ castellatedMeshControls
     {
         // zones refinementSurfaces to replace
 
-        // context refinementSurfaces features to replace
+        // context meshes refinementSurfaces to replace
     }
 
     refinementRegions
