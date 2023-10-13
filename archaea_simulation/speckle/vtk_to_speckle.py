@@ -73,7 +73,3 @@ def vtk_to_speckle(path: str):
     mesh.colors = colors
 
     return mesh
-
-
-vtk_to_speckle('/home/koral/OpenFOAM/koral-9/run/archaea-simulation/cfd/test-for-speckle-vtk/postProcessing'
-               '/cutPlaneSurface/400/U_cutPlane.vtk')
