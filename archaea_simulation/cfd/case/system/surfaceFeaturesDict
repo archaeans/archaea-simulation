@@ -38,20 +38,6 @@ outlet
 	writeObj	yes;
 }
 
-zones
-{
-	surfaces
-	(
-		"zones.stl"
-	);
-	
-	includedAngle	180;
-	
-	writeObj	yes;
-	
-	
-}
-
 sides
 {
 	surfaces
@@ -64,17 +50,29 @@ sides
 	writeObj	yes;
 }
 
-context_meshes
-{
-	surfaces
-	(
-		"context_meshes.stl"
-	);
-	
-	includedAngle	180;
-	
-	writeObj	yes;
-}
+// zones to replace
+
+// zones
+// {
+// 	surfaces
+// 	(
+// 		"zones.stl"
+// 	);
+// 	includedAngle	180;
+// 	writeObj	yes;
+// }
+
+// context meshes to replace
+
+// context_meshes
+// {
+// 	surfaces
+// 	(
+// 		"context_meshes.stl"
+// 	);
+// 	includedAngle	180;
+// 	writeObj	yes;
+// }
 
 #includeEtc "caseDicts/surface/surfaceFeaturesDict.cfg"
 

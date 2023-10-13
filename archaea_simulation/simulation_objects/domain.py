@@ -14,8 +14,8 @@ from archaea.geometry.vector3d import Vector3d
 
 from archaea_simulation.simulation_objects.wall import Wall
 from archaea_simulation.simulation_objects.zone import Zone
-from archaea_simulation.cfd.utils.snappyHexMesh import snappy_hex_mesh_geometry, snappy_hex_mesh_refinementSurfaces, snappy_hex_mesh_features
-
+from archaea_simulation.cfd.utils.snappyHexMeshDict import snappy_hex_mesh_geometry, snappy_hex_mesh_refinementSurfaces, snappy_hex_mesh_features
+from archaea_simulation.cfd.utils.surfaceFeaturesDict import surface_features_entry
 
 class Domain(Zone):
     center: Point3d
@@ -122,7 +122,20 @@ class Domain(Zone):
         self.export_domain_to_stl(trisurface_path)
         self.update_block_mesh_dict(case_folder_path)
         self.update_snappy_hex_mesh_dict(case_folder_path)
+        self.update_surface_features_dict(case_folder_path)
 
+    def update_surface_features_dict(self, case_folder_path):
+        surface_features_dict_path = os.path.join(case_folder_path, "system", "surfaceFeaturesDict")
+        if any(self.zones):
+            zones_entry = surface_features_entry("zones")
+            with fileinput.FileInput(surface_features_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// zones to replace', zones_entry), end='')
+        if any(self.context_meshes):
+            context_meshes_entry = surface_features_entry("zones")
+            with fileinput.FileInput(surface_features_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// context meshes to replace', context_meshes_entry), end='')
 
     def update_snappy_hex_mesh_dict(self, case_folder_path):
         """Snappy hex mesh dict defines which meshes will be considered
