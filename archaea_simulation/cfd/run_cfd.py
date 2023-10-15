@@ -167,7 +167,7 @@ def run_cfd(argv):
 
     branch = client.branch.get(stream.id, "OpenFOAM")
 
-    domain = Domain(Point3d.origin(),
+    domain = Domain(Point3d(50, 50, 0),
                     float(arg_domain_width),       # x
                     float(arg_domain_depth),       # y
                     float(arg_domain_height),      # z

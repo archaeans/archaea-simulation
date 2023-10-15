@@ -258,6 +258,13 @@ class Domain(Zone):
         mesh = Mesh()
         walls = self.create_solid_faces()
         mesh.add_from_faces(walls)
+        if any(self.context_meshes):
+            for context_m in self.context_meshes:
+                for polygon in context_m.polygons:
+                    vertices = []
+                    for index in polygon:
+                        vertices.append(context_m.vertices[index])
+                    mesh.add_polygon(vertices)
         mesh.to_stl(path, "combined")
 
     def export_zones_to_stl(self, path):
