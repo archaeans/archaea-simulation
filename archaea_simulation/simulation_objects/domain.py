@@ -40,20 +40,26 @@ class Domain(Zone):
                  wind_speed: float = 10,
                  wind_direction: float = 0,
                  zones=None,
-                 context=None):
+                 context=None,
+                 context_meshes=None):
         if context is None:
-            context = []
+            self.context = []
+        else:
+            self.context = context
+        if context_meshes is None:
             self.context_meshes = []
+        else:
+            self.context_meshes = context_meshes
         if zones is None:
-            zones = []
+            self.zones = []
+        else:
+            self.zones = zones
         self.center = center
         self.x = x
         self.y = y
         self.z = z
         self.wind_speed = wind_speed
         self.wind_direction = wind_direction
-        self.zones = zones
-        self.context = context
         ground = self.init_ground()
         super().__init__(ground, self.z, wall_default_thickness=0)
         self.ground = self.floor
@@ -236,6 +242,14 @@ class Domain(Zone):
         walls = self.domain_zone_faces()
         mesh.add_from_faces(walls, False)
         return mesh
+    
+    def export_context_to_single_mesh(self):
+        mesh = Mesh()
+        for m in self.context_meshes:
+            for p in m.polygons:
+                mesh.add_polygon([m.vertices[p_index] for p_index in p])
+        return mesh
+        
 
     def export_all_to_single_mesh(self):
         mesh = Mesh()

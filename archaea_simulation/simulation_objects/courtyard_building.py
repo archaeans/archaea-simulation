@@ -2,6 +2,7 @@ from archaea.geometry.point3d import Point3d
 from archaea.geometry.loop import Loop
 from archaea.geometry.line_segment import LineSegment
 from archaea.geometry.face import Face
+from archaea.geometry.mesh import Mesh
 from archaea.geometry.vector3d import Vector3d
 from archaea_simulation.simulation_objects.zone import Zone
 from archaea_simulation.simulation_objects.wall import Wall
@@ -10,6 +11,7 @@ from archaea_simulation.simulation_objects.wall_type import WallType
 
 class CourtyardBuilding:
     zones: "list[Zone]"
+    context: "list[Mesh]"
 
     def __init__(self,
                  center: Point3d,
@@ -27,6 +29,7 @@ class CourtyardBuilding:
                  room_door_width: float,
                  room_door_height: float,
                  ):
+        self.context = []
         self.center = center
         self.number_of_storeys = number_of_storeys
         self.number_of_rooms = number_of_rooms
@@ -42,6 +45,7 @@ class CourtyardBuilding:
         self.room_door_width = room_door_width
         self.room_door_height = room_door_height
         self.create_zones()
+        self.create_courtyard_walls()
 
     def create_zones(self):
         c = self.center
@@ -49,10 +53,25 @@ class CourtyardBuilding:
         x_center_distance_first_room = building_block_width / 2
         y_shift = self.courtyard_width / 2
 
-        zones = []
-        # self.create_block_zones(x_center_distance_first_room, y_shift, zones)
+        zones: list[Zone] = []
         self.create_block_zones(x_center_distance_first_room, -y_shift - self.room_depth, zones)
         self.zones = zones
+        rotated_zones = [zone.rotate(Vector3d(0, 0, 1), 180, self.center) for zone in zones]
+        self.zones += rotated_zones
+
+    def create_courtyard_walls(self):
+        building_block_width = self.number_of_rooms * self.room_width
+        x = building_block_width / 2
+        y = self.courtyard_width / 2
+        z = self.number_of_storeys * self.room_height
+
+        mesh_1 = Mesh()
+        mesh_2 = Mesh()
+        face_1 = Face(Loop([Point3d(x, y, 0), Point3d(x, y, z), Point3d(x, -y, z), Point3d(x, -y, 0)]))
+        face_2 = Face(Loop([Point3d(-x, y, 0), Point3d(-x, y, z), Point3d(-x, -y, z), Point3d(-x, -y, 0)]))
+        mesh_1.add_from_face(face_1)
+        mesh_2.add_from_face(face_2)
+        self.context = [mesh_1, mesh_2]
 
     def create_block_zones(self, x_center_distance_first_room, y_shift, zones):
         for i in range(self.number_of_rooms):

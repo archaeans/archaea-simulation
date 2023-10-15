@@ -170,7 +170,8 @@ def run_cfd(argv):
     domain = Domain(Point3d.origin(),
                     float(arg_domain_width),       # x
                     float(arg_domain_depth),       # y
-                    float(arg_domain_height)       # z
+                    float(arg_domain_height),      # z
+                    context_meshes = courtyard_building.context
                     )
 
     for zone in courtyard_building.zones:
@@ -191,8 +192,16 @@ def run_cfd(argv):
     zones_mesh.vertices = [item for sublist in archaea_zone_mesh.vertices for item in sublist]
     zones_mesh.faces = [item for sublist in archaea_zone_mesh.polygons for item in [len(sublist)] + sublist]
 
+    context_mesh = Mesh()
+    context_mesh.units = 'm'
+    context_mesh.name = 'Context'
+    archaea_context_mesh = domain.export_context_to_single_mesh()
+    context_mesh.vertices = [item for sublist in archaea_context_mesh.vertices for item in sublist]
+    context_mesh.faces = [item for sublist in archaea_context_mesh.polygons for item in [len(sublist)] + sublist]
+
     base.Domain = [domain_ground_mesh]
     base.Buildings = [zones_mesh]
+    base.Context = [context_mesh]
 
     archaea_folder = get_cfd_export_path()
     if not os.path.exists(archaea_folder):
@@ -208,23 +217,22 @@ def run_cfd(argv):
         pipefile.close()
         os.remove('output')
 
-    vtk_file = os.path.join(case_folder, 'postProcessing',
+        vtk_file = os.path.join(case_folder, 'postProcessing',
                             'cutPlaneSurface', '400', 'U_cutPlane.vtk')
 
-    result_mesh = vtk_to_speckle(vtk_file)
-    base.Results = [result_mesh]
+        result_mesh = vtk_to_speckle(vtk_file)
+        base.Results = [result_mesh]
 
-    obj_id = operations.send(base, [transport])
+        obj_id = operations.send(base, [transport])
 
-    # now create a commit on that branch with your updated data!
-    commit_id = client.commit.create(
-        stream.id,
-        obj_id,
-        branch.name,
-        message="Sent from Archaea.",
-        source_application='Archaea'
-    )
-
+        # now create a commit on that branch with your updated data!
+        commit_id = client.commit.create(
+            stream.id,
+            obj_id,
+            branch.name,
+            message="Sent from Archaea.",
+            source_application='Archaea'
+        )
 
 if __name__ == "__main__":
     run_cfd(sys.argv)

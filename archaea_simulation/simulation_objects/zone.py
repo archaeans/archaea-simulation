@@ -48,5 +48,9 @@ class Zone:
         faces = []
         for wall in self.all_surfaces():
             faces += wall.create_solid_faces(self.has_opening())
-
         return faces
+    
+    def rotate(self, axis, angle, origin=None):
+        rotated_floor = self.floor.rotate(axis, angle, origin)
+        rotated_walls = [wall.rotate(axis, angle, origin) for wall in self.walls]
+        return Zone(rotated_floor, self.height, rotated_walls, self.wall_default_thickness)

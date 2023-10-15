@@ -42,6 +42,19 @@ class Wall(Face):
         reversed_outer_loop = self.outer_loop.reverse()
         reversed_inner_loops = [loop.reverse() for loop in self.inner_loops]
         return Wall(reversed_outer_loop, reversed_inner_loops, self.wall_type, self.thickness)
+    
+    def rotate(self, axis, angle, origin=None):
+        rotated_border_points = [p.rotate(axis, angle, origin) for p in self.wall_border.points]
+        rotated_border_loop = Loop(rotated_border_points)
+
+        rotated_opening_loops = []
+        for opening_loop in self.openings:
+            rotated_opening_points = [p.rotate(axis, angle, origin) for p in opening_loop.points]
+            rotated_opening_loop = Loop(rotated_opening_points)
+            rotated_opening_loops.append(rotated_opening_loop)
+
+        return Wall(rotated_border_loop, rotated_opening_loops, self.wall_type, self.thickness)
+
 
     @functools.cached_property
     def gross_wall_area(self):
