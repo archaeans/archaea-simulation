@@ -11,7 +11,7 @@ from specklepy.objects.geometry import Mesh, Base
 from archaea_simulation.speckle.account import get_auth_speckle_client
 from archaea_simulation.speckle.vtk_to_speckle import vtk_to_speckle
 from archaea_simulation.simulation_objects.domain import Domain
-from archaea_simulation.utils.path import get_cfd_export_path
+from archaea_simulation.cfd.utils.path import get_cfd_export_path
 from archaea_simulation.simulation_objects.courtyard_building import CourtyardBuilding
 
 
