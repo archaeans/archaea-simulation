@@ -197,14 +197,14 @@ class Domain(Zone):
                    '({x4}\t{y4}\t{z4})\n    ' \
                    '({x5}\t{y5}\t{z5})\n    ' \
                    '({x6}\t{y6}\t{z6})\n    ' \
-                   '({x7}\t{y7}\t{z7})\n    '.format(x0=-self.x/2, y0=-self.y/2, z0=0,
-                                                     x1=self.x/2, y1=-self.y/2, z1=0,
-                                                     x2=self.x/2, y2=self.y/2, z2=0,
-                                                     x3=-self.x/2, y3=self.y/2, z3=0,
-                                                     x4=-self.x/2, y4=-self.y/2, z4=self.z,
-                                                     x5=self.x/2, y5=-self.y/2, z5=self.z,
-                                                     x6=self.x/2, y6=self.y/2, z6=self.z,
-                                                     x7=-self.x/2, y7=self.y/2, z7=self.z,
+                   '({x7}\t{y7}\t{z7})\n    '.format(x0=-self.x/2 + self.center.x, y0=-self.y/2 + self.center.y, z0=0,
+                                                     x1=self.x/2 + self.center.x, y1=-self.y/2 + self.center.y, z1=0,
+                                                     x2=self.x/2 + self.center.x, y2=self.y/2 + self.center.y, z2=0,
+                                                     x3=-self.x/2 + self.center.x, y3=self.y/2 + self.center.y, z3=0,
+                                                     x4=-self.x/2 + self.center.x, y4=-self.y/2 + self.center.y, z4=self.z,
+                                                     x5=self.x/2 + self.center.x, y5=-self.y/2 + self.center.y, z5=self.z,
+                                                     x6=self.x/2 + self.center.x, y6=self.y/2 + self.center.y, z6=self.z,
+                                                     x7=-self.x/2 + self.center.x, y7=self.y/2 + self.center.y, z7=self.z,
                                                      )
 
         with fileinput.FileInput(block_mesh_dict_path, inplace=True) as file:
