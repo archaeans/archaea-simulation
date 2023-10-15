@@ -59,7 +59,7 @@ castellatedMeshControls
         }
     }
 
-    locationInMesh (1 1 1);
+    // location in mesh to replace
 }
 
 snapControls

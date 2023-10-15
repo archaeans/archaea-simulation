@@ -130,8 +130,10 @@ def run_cfd(argv):
         elif opt in ("-dwh", "--door-window-height"):
             arg_room_door_height = arg
 
+    center = Point3d(50,50,0)
+
     courtyard_building = CourtyardBuilding(
-        Point3d.origin(),
+        center,
         int(arg_number_of_storeys),
         int(arg_number_of_rooms),
         float(arg_courtyard_width),
@@ -167,7 +169,7 @@ def run_cfd(argv):
 
     branch = client.branch.get(stream.id, "OpenFOAM")
 
-    domain = Domain(Point3d(50, 50, 0),
+    domain = Domain(center,
                     float(arg_domain_width),       # x
                     float(arg_domain_depth),       # y
                     float(arg_domain_height),      # z

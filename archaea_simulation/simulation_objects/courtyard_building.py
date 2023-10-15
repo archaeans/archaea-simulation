@@ -64,11 +64,13 @@ class CourtyardBuilding:
         x = building_block_width / 2
         y = self.courtyard_width / 2
         z = self.number_of_storeys * self.room_height
+        x_shift = self.center.x
+        y_shift = self.center.y
 
         mesh_1 = Mesh()
         mesh_2 = Mesh()
-        face_1 = Face(Loop([Point3d(x, y, 0), Point3d(x, y, z), Point3d(x, -y, z), Point3d(x, -y, 0)]))
-        face_2 = Face(Loop([Point3d(-x, y, 0), Point3d(-x, y, z), Point3d(-x, -y, z), Point3d(-x, -y, 0)]))
+        face_1 = Face(Loop([Point3d(x + x_shift, y + y_shift, 0), Point3d(x + x_shift, y + y_shift, z), Point3d(x + x_shift, -y + y_shift, z), Point3d(x + x_shift, -y + y_shift, 0)]))
+        face_2 = Face(Loop([Point3d(-x  + x_shift, y + y_shift, 0), Point3d(-x + x_shift, y + y_shift, z), Point3d(-x + x_shift, -y + y_shift, z), Point3d(-x + x_shift, -y + y_shift, 0)]))
         mesh_1.add_from_face(face_1)
         mesh_2.add_from_face(face_2)
         self.context = [mesh_1, mesh_2]

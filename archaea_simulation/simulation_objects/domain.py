@@ -184,6 +184,11 @@ class Domain(Zone):
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
                     print(line.replace('// context meshes refinementSurfaces to replace', context_meshes_refinement_entry), end='')
+
+            location_in_mesh = f'locationInMesh ({self.center.x + 1} {self.center.y + 1} {self.center.z + 1});'
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// location in mesh to replace', location_in_mesh), end='')
         
 
     def update_block_mesh_dict(self, case_folder_path):
