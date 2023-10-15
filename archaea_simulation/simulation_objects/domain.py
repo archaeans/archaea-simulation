@@ -100,7 +100,6 @@ class Domain(Zone):
         faces = []
         for zone in self.zones:
             faces += zone.create_solid_faces()
-
         return faces
 
     def domain_faces(self):
@@ -112,7 +111,6 @@ class Domain(Zone):
         faces = []
         for zone in self.zones:
             faces += zone.create_solid_faces()
-
         return faces
 
     def create_case(self, case_folder_path):
@@ -248,8 +246,7 @@ class Domain(Zone):
         for m in self.context_meshes:
             for p in m.polygons:
                 mesh.add_polygon([m.vertices[p_index] for p_index in p])
-        return mesh
-        
+        return mesh  
 
     def export_all_to_single_mesh(self):
         mesh = Mesh()
@@ -295,4 +292,3 @@ class Domain(Zone):
         mesh = Mesh()
         mesh.add_from_faces([self.walls[0], self.walls[2], self.floor.reverse(), self.ceiling.reverse()])
         mesh.to_stl(path, "sides")
-
