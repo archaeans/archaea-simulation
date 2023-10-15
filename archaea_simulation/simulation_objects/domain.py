@@ -129,6 +129,14 @@ class Domain(Zone):
         self.update_snappy_hex_mesh_dict(case_folder_path)
         self.update_surface_features_dict(case_folder_path)
         self.update_initial_conditions(case_folder_path)
+        self.update_cut_plane_surface(case_folder_path)
+
+    def update_cut_plane_surface(self, case_folder_path):
+        cut_plane_surface_dict_path = os.path.join(case_folder_path, "system", "cutPlaneSurface")
+        cut_plane_surface_point = f'point       ({self.center.x} {self.center.y} 1.5);'
+        with fileinput.FileInput(cut_plane_surface_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// point to replace', cut_plane_surface_point), end='')
 
     def update_initial_conditions(self, case_folder_path):
         u_file = os.path.join(case_folder_path, "0", "U")
@@ -185,7 +193,7 @@ class Domain(Zone):
                 for line in file:
                     print(line.replace('// context meshes refinementSurfaces to replace', context_meshes_refinement_entry), end='')
 
-            location_in_mesh = f'locationInMesh ({self.center.x + 1} {self.center.y + 1} {self.center.z + 1});'
+            location_in_mesh = f'locationInMesh ({self.center.x - (self.x / 2) + 1} {self.center.y - (self.y / 2) + 1} {self.center.z + 1});'
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
                     print(line.replace('// location in mesh to replace', location_in_mesh), end='')
