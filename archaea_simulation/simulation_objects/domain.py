@@ -31,12 +31,18 @@ class Domain(Zone):
     context_meshes: "list[Mesh]"
     openings: "list[Wall]"
     MIN_DOMAIN_SIZE = 10
+    x_scale: float
+    y_scale: float
+    z_scale: float
 
     def __init__(self,
                  center: Point3d,
                  x: float,
                  y: float,
                  z: float,
+                 x_scale: float = 5,
+                 y_scale: float = 5,
+                 z_scale: float = 3,
                  wind_speed: float = 10,
                  wind_direction: float = 0,
                  zones=None,
@@ -58,6 +64,9 @@ class Domain(Zone):
         self.x = x
         self.y = y
         self.z = z
+        self.x_scale = x_scale
+        self.y_scale = y_scale
+        self.z_scale = z_scale
         self.wind_speed = wind_speed
         self.wind_direction = wind_direction
         ground = self.init_ground()
@@ -65,14 +74,14 @@ class Domain(Zone):
         self.ground = self.floor
 
     @classmethod
-    def from_meshes(cls, meshes: "list[Mesh]"):
+    def from_meshes(cls, meshes: "list[Mesh]", x_scale: float = 5, y_scale: float = 5, z_scale: float = 3):
         mesh_vertices = [mesh.vertices for mesh in meshes]
         vertices = list(itertools.chain.from_iterable(mesh_vertices))
         bbox = BoundingBox.from_points(vertices)
         x_dist = abs(bbox.max.x - bbox.min.x)
         y_dist = abs(bbox.max.y - bbox.min.y)
         z_dist = abs(bbox.max.z - bbox.min.z)
-        domain = cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z), x_dist * 5, y_dist * 5, z_dist * 3)
+        domain = cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z), x_dist, y_dist, z_dist, x_scale=x_scale, y_scale=y_scale, z_scale=z_scale)
         domain.context_meshes = meshes
         return domain
 
