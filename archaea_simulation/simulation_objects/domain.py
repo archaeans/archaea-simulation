@@ -81,7 +81,7 @@ class Domain(Zone):
         x_dist = abs(bbox.max.x - bbox.min.x)
         y_dist = abs(bbox.max.y - bbox.min.y)
         z_dist = abs(bbox.max.z - bbox.min.z)
-        domain = cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z), x_dist, y_dist, z_dist, x_scale=x_scale, y_scale=y_scale, z_scale=z_scale)
+        domain = cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z), x_dist * x_scale, y_dist * y_scale, z_dist * z_scale, x_scale=x_scale, y_scale=y_scale, z_scale=z_scale)
         domain.context_meshes = meshes
         return domain
 
