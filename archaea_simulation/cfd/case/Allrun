@@ -2,7 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 
 # Source tutorial run functions
-. /opt/openfoam9/bin/tools/RunFunctions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 runApplication surfaceFeatures
 
