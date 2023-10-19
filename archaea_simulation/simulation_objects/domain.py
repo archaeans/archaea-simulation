@@ -69,6 +69,7 @@ class Domain(Zone):
         self.z_scale = z_scale
         self.wind_speed = wind_speed
         self.wind_direction = wind_direction
+        self.init_corners()
         ground = self.init_ground()
         super().__init__(ground, self.z, wall_default_thickness=0)
         self.ground = self.floor
@@ -84,15 +85,28 @@ class Domain(Zone):
         domain = cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z), x_dist * x_scale, y_dist * y_scale, z_dist * z_scale, x_scale=x_scale, y_scale=y_scale, z_scale=z_scale)
         domain.context_meshes = meshes
         return domain
+    
+    def init_corners(self):
+        c = self.center
+        v = Vector3d(0,0,1)
+        self.p0 = c.move(Vector3d(self.x / 2 * -1, self.y / 2 * -1, 0)).rotate(v, self.wind_direction, c)  # left-bottom-floor
+        self.p1 = c.move(Vector3d(self.x / 2, self.y / 2 * -1, 0)).rotate(v, self.wind_direction, c)  # right-bottom-floor
+        self.p2 = c.move(Vector3d(self.x / 2, self.y / 2, 0)).rotate(v, self.wind_direction, c) # right-top-floor
+        self.p3 = c.move(Vector3d(self.x / 2 * -1, self.y / 2, 0)).rotate(v, self.wind_direction, c)  # left-top-floor
+        self.p4 = self.p0.move(Vector3d(0, 0, self.z))
+        self.p5 = self.p1.move(Vector3d(0, 0, self.z))
+        self.p6 = self.p2.move(Vector3d(0, 0, self.z))
+        self.p7 = self.p3.move(Vector3d(0, 0, self.z))
 
     def init_ground(self) -> Face:
         c = self.center
-        ground_outer_loop = Loop([
-            c.move(Vector3d(self.x / 2 * -1, self.y / 2 * -1, 0)),  # left-bottom
-            c.move(Vector3d(self.x / 2 * -1, self.y / 2, 0)),  # left-top
-            c.move(Vector3d(self.x / 2, self.y / 2, 0)),  # right-top
-            c.move(Vector3d(self.x / 2, self.y / 2 * -1, 0)),  # right-bottom
-        ])
+        # ground_outer_loop = Loop([
+        #     c.move(Vector3d(self.x / 2 * -1, self.y / 2 * -1, 0)),  # left-bottom
+        #     c.move(Vector3d(self.x / 2 * -1, self.y / 2, 0)),  # left-top
+        #     c.move(Vector3d(self.x / 2, self.y / 2, 0)),  # right-top
+        #     c.move(Vector3d(self.x / 2, self.y / 2 * -1, 0)),  # right-bottom
+        # ])
+        ground_outer_loop = Loop([self.p0, self.p3, self.p2, self.p1])
         ground_inner_loops = [zone.floor.wall_border for zone in self.zones if zone.floor.wall_border.normal.z == 0]
         ground = Face(ground_outer_loop, ground_inner_loops)
         return ground
@@ -202,7 +216,8 @@ class Domain(Zone):
                 for line in file:
                     print(line.replace('// context meshes refinementSurfaces to replace', context_meshes_refinement_entry), end='')
 
-            location_in_mesh = f'locationInMesh ({self.center.x - (self.x / 2) + 1} {self.center.y - (self.y / 2) + 1} {self.center.z + 1});'
+            in_mesh_point = self.p0.move(self.p0.vector_to(self.center).normalized())
+            location_in_mesh = f'locationInMesh ({in_mesh_point.x} {in_mesh_point.y} {self.center.z + 1});'
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
                     print(line.replace('// location in mesh to replace', location_in_mesh), end='')
@@ -219,14 +234,14 @@ class Domain(Zone):
                    '({x4}\t{y4}\t{z4})\n    ' \
                    '({x5}\t{y5}\t{z5})\n    ' \
                    '({x6}\t{y6}\t{z6})\n    ' \
-                   '({x7}\t{y7}\t{z7})\n    '.format(x0=-self.x/2 + self.center.x, y0=-self.y/2 + self.center.y, z0=0,
-                                                     x1=self.x/2 + self.center.x, y1=-self.y/2 + self.center.y, z1=0,
-                                                     x2=self.x/2 + self.center.x, y2=self.y/2 + self.center.y, z2=0,
-                                                     x3=-self.x/2 + self.center.x, y3=self.y/2 + self.center.y, z3=0,
-                                                     x4=-self.x/2 + self.center.x, y4=-self.y/2 + self.center.y, z4=self.z,
-                                                     x5=self.x/2 + self.center.x, y5=-self.y/2 + self.center.y, z5=self.z,
-                                                     x6=self.x/2 + self.center.x, y6=self.y/2 + self.center.y, z6=self.z,
-                                                     x7=-self.x/2 + self.center.x, y7=self.y/2 + self.center.y, z7=self.z,
+                   '({x7}\t{y7}\t{z7})\n    '.format(x0=self.p0.x, y0=self.p0.y, z0=self.p0.z,
+                                                     x1=self.p1.x, y1=self.p1.y, z1=self.p1.z,
+                                                     x2=self.p2.x, y2=self.p2.y, z2=self.p2.z,
+                                                     x3=self.p3.x, y3=self.p3.y, z3=self.p3.z,
+                                                     x4=self.p4.x, y4=self.p4.y, z4=self.p4.z,
+                                                     x5=self.p5.x, y5=self.p5.y, z5=self.p5.z,
+                                                     x6=self.p6.x, y6=self.p6.y, z6=self.p6.z,
+                                                     x7=self.p7.x, y7=self.p7.y, z7=self.p7.z
                                                      )
 
         with fileinput.FileInput(block_mesh_dict_path, inplace=True) as file:

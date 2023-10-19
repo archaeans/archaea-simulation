@@ -35,12 +35,16 @@ def run_cfd(argv):
     arg_room_door_existence = 1
     arg_room_door_width = 0.8
     arg_room_door_height = 2.0
+    arg_wind_direction = 0
+    arg_wind_speed = 10.0
 
     arg_help = "{0}\n\n" \
                "Welcome to stl exporter program for cfd calculations! \n" \
                "Use below flags to generate stl.\n" \
                " -n\t--name                        <name>                    default: test\n" \
                " -x\t--exec                        <exec>                    default: 0\n" \
+               " -ws\t--wind-speed                 <wind_speed>              default: 10\n" \
+               " -wd\t--wind-direction             <wind_direction>          default: 0\n" \
                " -dw\t--domain-width               <domain_width>            default: 100.0\n" \
                " -dd\t--domain-depth               <domain_depth>            default: 50.0\n" \
                " -dh\t--domain-height              <domain_height>           default: 50.0\n" \
@@ -59,10 +63,12 @@ def run_cfd(argv):
                " -rdh\t--room-door-height          <room_door_height>         default: 2.0\n".format(argv[0])
 
     try:
-        opts, args = getopt.getopt(argv[1:], "hxn:hdw:dd:dh:nos:nor:cw:rw:rd:rh:rwt:rwe:rww:rwh:rde:rdw:rdh:",
+        opts, args = getopt.getopt(argv[1:], "hxn:ws:wd:dw:dd:dh:nos:nor:cw:rw:rd:rh:rwt:rwe:rww:rwh:rde:rdw:rdh:",
                                    ["help",
                                     "exec",
                                     "name=",
+                                    "wind-speed=",
+                                    "wind-direction=",
                                     "domain-width=",
                                     "domain-depth=",
                                     "domain-height=",
@@ -93,10 +99,14 @@ def run_cfd(argv):
         if opt in ("-h", "--help"):
             print(arg_help)  # print the help message
             sys.exit(2)
-        elif opt in ("-n", "--name"):
-            arg_name = arg
         elif opt in ("-x", "--exec"):
             arg_exec = True
+        elif opt in ("-n", "--name"):
+            arg_name = arg
+        elif opt in ("-ws", "--wind-speed"):
+            arg_wind_speed = arg
+        elif opt in ("-wd", "--wind-direction"):
+            arg_wind_direction = arg
         elif opt in ("-dw", "--domain-width"):
             arg_domain_width = arg
         elif opt in ("-dd", "--domain-depth"):
@@ -168,18 +178,24 @@ def run_cfd(argv):
         branch_id = client.branch.create(stream.id, "OpenFOAM", "Created by Archaea.")
 
     branch = client.branch.get(stream.id, "OpenFOAM")
-
+    print(float(arg_wind_direction))
+    print(float(arg_wind_speed))
     domain = Domain(center,
                     float(arg_domain_width),       # x
                     float(arg_domain_depth),       # y
                     float(arg_domain_height),      # z
-                    context_meshes = courtyard_building.context
+                    context_meshes = courtyard_building.context,
+                    wind_direction = float(arg_wind_direction),
+                    wind_speed = float(arg_wind_speed) 
                     )
+    print(domain.wind_direction)
+    print(domain.wind_speed)
 
     for zone in courtyard_building.zones:
         domain.add_zone(zone)
 
     base = Base(detachable={'Domain', 'Buildings', 'Results'})
+    
     domain_ground_mesh = Mesh()
     domain_ground_mesh.units = 'm'
     domain_ground_mesh.name = 'Ground'
