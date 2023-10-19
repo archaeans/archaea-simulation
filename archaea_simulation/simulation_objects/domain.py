@@ -75,14 +75,31 @@ class Domain(Zone):
         self.ground = self.floor
 
     @classmethod
-    def from_meshes(cls, meshes: "list[Mesh]", x_scale: float = 5, y_scale: float = 5, z_scale: float = 3):
+    def from_meshes(
+        cls, meshes: "list[Mesh]", 
+        x_scale: float = 5, 
+        y_scale: float = 5, 
+        z_scale: float = 3, 
+        wind_speed: float = 10,
+        wind_direction: float = 0
+        ):
         mesh_vertices = [mesh.vertices for mesh in meshes]
         vertices = list(itertools.chain.from_iterable(mesh_vertices))
         bbox = BoundingBox.from_points(vertices)
         x_dist = abs(bbox.max.x - bbox.min.x)
         y_dist = abs(bbox.max.y - bbox.min.y)
         z_dist = abs(bbox.max.z - bbox.min.z)
-        domain = cls(Point3d(bbox.center.x, bbox.center.y, bbox.min.z), x_dist * x_scale, y_dist * y_scale, z_dist * z_scale, x_scale=x_scale, y_scale=y_scale, z_scale=z_scale)
+        domain = cls(
+            Point3d(bbox.center.x, bbox.center.y, bbox.min.z), 
+            x_dist * x_scale, 
+            y_dist * y_scale, 
+            z_dist * z_scale, 
+            x_scale=x_scale, 
+            y_scale=y_scale, 
+            z_scale=z_scale,
+            wind_direction=wind_direction,
+            wind_speed=wind_speed
+            )
         domain.context_meshes = meshes
         return domain
     
