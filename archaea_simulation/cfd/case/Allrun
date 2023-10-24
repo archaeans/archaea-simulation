@@ -1,20 +1,130 @@
 #!/bin/bash
 cd ${0%/*} || exit 1    # run from this directory
 
+total_start_time=$(date +%s.%N)
+
 source /opt/openfoam9/etc/bashrc
 
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
+echo "###################################"
+echo "STEP 1- Run functions Loaded"
+echo "###################################"
+
+start_time=$(date +%s.%N)
 
 runApplication surfaceFeatures
 
-runApplication blockMesh
-runApplication snappyHexMesh -overwrite
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+echo "###################################"
+echo "STEP 2- surfaceFeatures Done!"
+echo "Elapsed time: $elapsed_time seconds"
+echo "###################################"
 
-runApplication $(getApplication)
+
+start_time=$(date +%s.%N)
+
+runApplication blockMesh
+
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+echo "###################################"
+echo "STEP 3- blockMesh Done!"
+echo "Elapsed time: $elapsed_time seconds"
+echo "###################################"
+
+
+start_time=$(date +%s.%N)
+
+# Decompose the domain
+runApplication decomposePar -copyZero
+
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+echo "###################################"
+echo "STEP 4- decomposePar Done!"
+echo "Elapsed time: $elapsed_time seconds"
+echo "###################################"
+
+
+start_time=$(date +%s.%N)
+
+runParallel snappyHexMesh -overwrite
+
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+echo "###################################"
+echo "STEP 5- snappyHexMesh Done!"
+echo "Elapsed time: $elapsed_time seconds"
+echo "###################################"
+
+
+start_time=$(date +%s.%N)
+
+runParallel patchSummary
+runParallel $(getApplication)
+
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+echo "###################################"
+echo "STEP 6- (getApplication) Done!"
+echo "Elapsed time: $elapsed_time seconds"
+echo "###################################"
+
+
+start_time=$(date +%s.%N)
+
+runApplication reconstructParMesh -constant
+
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+echo "###################################"
+echo "STEP 7- reconstructParMesh Done!"
+echo "Elapsed time: $elapsed_time seconds"
+echo "###################################"
+
+
+start_time=$(date +%s.%N)
+
+runApplication reconstructPar -latestTime
+
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+echo "###################################"
+echo "STEP 8- reconstructPar Done!"
+echo "Elapsed time: $elapsed_time seconds"
+echo "###################################"
+
+start_time=$(date +%s.%N)
 
 simpleFoam -postProcess -func writeCellCentres
-# simpleFoam -postProcess -func sample
+
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+echo "###################################"
+echo "STEP 9- writeCellCentres Done!"
+echo "Elapsed time: $elapsed_time seconds"
+echo "###################################"
+
+
+start_time=$(date +%s.%N)
+
 simpleFoam -postProcess -func cutPlaneSurface
+
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+echo "###################################"
+echo "STEP 10- cutPlaneSurface Done!"
+echo "Elapsed time: $elapsed_time seconds"
+echo "###################################"
+
+
+total_end_time=$(date +%s.%N)
+total_elapsed_time=$(echo "$total_end_time - $total_start_time" | bc)
+
+echo "#########################################"
+echo "Total elapsed time: $total_elapsed_time seconds"
+echo "#########################################"
+
 
 #------------------------------------------------------------------------------

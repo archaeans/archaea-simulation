@@ -178,8 +178,6 @@ def run_cfd(argv):
         branch_id = client.branch.create(stream.id, "OpenFOAM", "Created by Archaea.")
 
     branch = client.branch.get(stream.id, "OpenFOAM")
-    print(float(arg_wind_direction))
-    print(float(arg_wind_speed))
     domain = Domain(center,
                     float(arg_domain_width),       # x
                     float(arg_domain_depth),       # y
@@ -188,8 +186,6 @@ def run_cfd(argv):
                     wind_direction = float(arg_wind_direction),
                     wind_speed = float(arg_wind_speed) 
                     )
-    print(domain.wind_direction)
-    print(domain.wind_speed)
 
     for zone in courtyard_building.zones:
         domain.add_zone(zone)
@@ -230,10 +226,8 @@ def run_cfd(argv):
 
     if arg_exec:
         cmd = os.path.join(case_folder, './Allrun')
-        pipefile = open('output', 'w')
-        retcode = subprocess.call(cmd, shell=True, stdout=pipefile)
-        pipefile.close()
-        os.remove('output')
+        completed_process = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        print(completed_process.stdout)
 
         vtk_file = os.path.join(case_folder, 'postProcessing',
                             'cutPlaneSurface', '400', 'U_cutPlane.vtk')

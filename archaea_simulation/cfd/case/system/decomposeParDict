@@ -9,42 +9,31 @@ FoamFile
 {
     format      ascii;
     class       dictionary;
-    object      controlDict;
+    object      decomposeParDict;
 }
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     simpleFoam;
+numberOfSubdomains 4;
 
-startFrom       latestTime;
+method          hierarchical;
+// method          ptscotch;
 
-startTime       0;
+simpleCoeffs
+{
+    n               (4 1 1);
+}
 
-stopAt          endTime;
+hierarchicalCoeffs
+{
+    n               (2 2 1);
+    order           xyz;
+}
 
-endTime         400;
+manualCoeffs
+{
+    dataFile        "cellDecomposition";
+}
 
-deltaT          1;
-
-writeControl    timeStep;
-
-writeInterval   50;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-// adjustTimeStep  yes;
-
-// maxCo           1;
 
 // ************************************************************************* //
