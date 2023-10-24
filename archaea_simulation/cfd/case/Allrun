@@ -16,7 +16,7 @@ start_time=$(date +%s.%N)
 runApplication surfaceFeatures
 
 end_time=$(date +%s.%N)
-elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")
 echo "###################################"
 echo "STEP 2- surfaceFeatures Done!"
 echo "Elapsed time: $elapsed_time seconds"
@@ -28,7 +28,7 @@ start_time=$(date +%s.%N)
 runApplication blockMesh
 
 end_time=$(date +%s.%N)
-elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")
 echo "###################################"
 echo "STEP 3- blockMesh Done!"
 echo "Elapsed time: $elapsed_time seconds"
@@ -40,7 +40,7 @@ start_time=$(date +%s.%N)
 # Decompose the domain
 runApplication decomposePar -copyZero
 
-elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")
 echo "###################################"
 echo "STEP 4- decomposePar Done!"
 echo "Elapsed time: $elapsed_time seconds"
@@ -52,7 +52,7 @@ start_time=$(date +%s.%N)
 runParallel snappyHexMesh -overwrite
 
 end_time=$(date +%s.%N)
-elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")
 echo "###################################"
 echo "STEP 5- snappyHexMesh Done!"
 echo "Elapsed time: $elapsed_time seconds"
@@ -65,7 +65,7 @@ runParallel patchSummary
 runParallel $(getApplication)
 
 end_time=$(date +%s.%N)
-elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")
 echo "###################################"
 echo "STEP 6- (getApplication) Done!"
 echo "Elapsed time: $elapsed_time seconds"
@@ -77,7 +77,7 @@ start_time=$(date +%s.%N)
 runApplication reconstructParMesh -constant
 
 end_time=$(date +%s.%N)
-elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")
 echo "###################################"
 echo "STEP 7- reconstructParMesh Done!"
 echo "Elapsed time: $elapsed_time seconds"
@@ -89,7 +89,7 @@ start_time=$(date +%s.%N)
 runApplication reconstructPar -latestTime
 
 end_time=$(date +%s.%N)
-elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")
 echo "###################################"
 echo "STEP 8- reconstructPar Done!"
 echo "Elapsed time: $elapsed_time seconds"
@@ -100,7 +100,7 @@ start_time=$(date +%s.%N)
 simpleFoam -postProcess -func writeCellCentres
 
 end_time=$(date +%s.%N)
-elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")
 echo "###################################"
 echo "STEP 9- writeCellCentres Done!"
 echo "Elapsed time: $elapsed_time seconds"
@@ -112,7 +112,7 @@ start_time=$(date +%s.%N)
 simpleFoam -postProcess -func cutPlaneSurface
 
 end_time=$(date +%s.%N)
-elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")
 echo "###################################"
 echo "STEP 10- cutPlaneSurface Done!"
 echo "Elapsed time: $elapsed_time seconds"
@@ -120,7 +120,7 @@ echo "###################################"
 
 
 total_end_time=$(date +%s.%N)
-total_elapsed_time=$(echo "$total_end_time - $total_start_time" | bc)
+total_elapsed_time=$(awk "BEGIN {print $total_end_time - $total_start_time;}")
 
 echo "#########################################"
 echo "Total elapsed time: $total_elapsed_time seconds"
