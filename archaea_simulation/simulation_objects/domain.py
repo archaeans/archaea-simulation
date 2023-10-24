@@ -61,9 +61,9 @@ class Domain(Zone):
         else:
             self.zones = zones
         self.center = center
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x = x * x_scale
+        self.y = y * y_scale
+        self.z = z * z_scale
         self.x_scale = x_scale
         self.y_scale = y_scale
         self.z_scale = z_scale
@@ -90,12 +90,12 @@ class Domain(Zone):
         y_dist = abs(bbox.max.y - bbox.min.y)
         z_dist = abs(bbox.max.z - bbox.min.z)
         domain = cls(
-            Point3d(bbox.center.x, bbox.center.y, bbox.min.z), 
-            x_dist * x_scale, 
-            y_dist * y_scale, 
-            z_dist * z_scale, 
-            x_scale=x_scale, 
-            y_scale=y_scale, 
+            Point3d(bbox.center.x, bbox.center.y, bbox.min.z),
+            x_dist,
+            y_dist,
+            z_dist,
+            x_scale=x_scale,
+            y_scale=y_scale,
             z_scale=z_scale,
             wind_direction=wind_direction,
             wind_speed=wind_speed
