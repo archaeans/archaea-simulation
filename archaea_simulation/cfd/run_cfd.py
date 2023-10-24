@@ -140,7 +140,7 @@ def run_cfd(argv):
         elif opt in ("-dwh", "--door-window-height"):
             arg_room_door_height = arg
 
-    center = Point3d(50,50,0)
+    center = Point3d(0,0,0)
 
     courtyard_building = CourtyardBuilding(
         center,
