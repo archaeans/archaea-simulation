@@ -209,7 +209,7 @@ class Domain(Zone):
         if any(self.zones):
             zones_entry = snappy_hex_mesh_geometry("zones", "zones")
             zones_features_entry = snappy_hex_mesh_features("zones", 1)
-            zones_refinement_entry = snappy_hex_mesh_refinementSurfaces("zones")
+            zones_refinement_entry = snappy_hex_mesh_refinementSurfaces("zones", 3, 3)
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
                     print(line.replace('// zones to replace', zones_entry), end='')
@@ -222,7 +222,7 @@ class Domain(Zone):
         if any(self.context_meshes):
             context_meshes_entry = snappy_hex_mesh_geometry("context_meshes", "context_meshes")
             context_meshes_features_entry = snappy_hex_mesh_features("context_meshes", 1)
-            context_meshes_refinement_entry = snappy_hex_mesh_refinementSurfaces("context_meshes")
+            context_meshes_refinement_entry = snappy_hex_mesh_refinementSurfaces("context_meshes", 2, 2)
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
                     print(line.replace('// context meshes to replace', context_meshes_entry), end='')
