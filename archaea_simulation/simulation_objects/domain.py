@@ -2,6 +2,7 @@ import fileinput
 import itertools
 import os
 import shutil
+import math
 from distutils.dir_util import copy_tree as copytree
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from archaea.geometry.loop import Loop
 from archaea.geometry.mesh import Mesh
 from archaea.geometry.point3d import Point3d
 from archaea.geometry.vector3d import Vector3d
+from archaea.geometry.plane import Plane
 
 from archaea_simulation.simulation_objects.wall import Wall
 from archaea_simulation.simulation_objects.zone import Zone
@@ -19,6 +21,7 @@ from archaea_simulation.cfd.utils.surfaceFeaturesDict import surface_features_en
 from archaea_simulation.cfd.utils.initialConditions import calculate_u_inlet
 
 class Domain(Zone):
+    bbox: BoundingBox
     center: Point3d
     ground: Face
     x: float
@@ -85,12 +88,22 @@ class Domain(Zone):
         ):
         mesh_vertices = [mesh.vertices for mesh in meshes]
         vertices = list(itertools.chain.from_iterable(mesh_vertices))
-        bbox = BoundingBox.from_points(vertices)
+
+        # Calculate the radians based on the given degree
+        radians = math.radians(-wind_direction)
+
+        # Calculate the u and v vectors using trigonometry
+        u_axis = Vector3d(math.cos(radians), math.sin(radians), 0)
+        v_axis = Vector3d(-math.sin(radians), math.cos(radians), 0)
+
+        plane = Plane(Point3d.origin(), u_axis, v_axis)
+        bbox = BoundingBox.from_points_in_plane(vertices, plane)
+        center = plane.point_at(bbox.center.x, bbox.center.y)
         x_dist = abs(bbox.max.x - bbox.min.x)
         y_dist = abs(bbox.max.y - bbox.min.y)
         z_dist = abs(bbox.max.z - bbox.min.z)
         domain = cls(
-            Point3d(bbox.center.x, bbox.center.y, bbox.min.z),
+            Point3d(center.x, center.y, bbox.min.z),
             x_dist,
             y_dist,
             z_dist,

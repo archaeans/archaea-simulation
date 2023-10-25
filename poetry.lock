@@ -45,13 +45,13 @@ files = [
 
 [[package]]
 name = "archaea"
-version = "1.1.22"
+version = "1.1.25"
 description = "Playground for geometry."
 optional = false
 python-versions = ">=3.10,<4.0"
 files = [
-    {file = "archaea-1.1.22-py3-none-any.whl", hash = "sha256:3f4b9b92e4a6c86db44290093eec12d914378304ac80ea1358368f6ffef05f11"},
-    {file = "archaea-1.1.22.tar.gz", hash = "sha256:7b35cdd0119551541312615123239a902fcadcd984f7b4f626baad7c1ca5deb5"},
+    {file = "archaea-1.1.25-py3-none-any.whl", hash = "sha256:648b011553630bb697dd113869d60e417e72b47d43c7e53c9431f232536f4ed0"},
+    {file = "archaea-1.1.25.tar.gz", hash = "sha256:5fe263eba016b4b82e6eda9325c17947ca5b3a9a02a288a18919bcc5037270e7"},
 ]
 
 [package.dependencies]

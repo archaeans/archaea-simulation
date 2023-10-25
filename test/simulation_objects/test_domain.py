@@ -87,4 +87,27 @@ class TestDomain(unittest.TestCase):
         walls = domain.create_solid_faces()
         domain_mesh.add_from_faces(walls)
         domain_mesh.to_stl("", "test_domain_from_meshes")
-        
+
+    def test_domain_from_meshes_with_bbox(self):
+        # Arrange
+        p0 = Point3d(2, 2, 0)
+        p1 = Point3d(3, 1, 0)
+        p2 = Point3d(6, 4, 0)
+        p3 = Point3d(5, 5, 0)
+
+        ground_loop_1 = Loop([p0, p3, p2, p1])
+        ground_face_1 = Face(ground_loop_1)
+        zone_without_hole = Zone(ground_face_1, 3)
+
+        mesh = Mesh()
+        faces = zone_without_hole.create_solid_faces()
+        for face in faces:
+            mesh.add_polygon(face.outer_loop.points[:-1])
+        mesh.to_stl("", "test_domain_from_meshes_with_bbox_context")
+
+        # Act
+        domain_mesh = Mesh()
+        domain = Domain.from_meshes([mesh])
+        walls = domain.create_solid_faces()
+        domain_mesh.add_from_faces(walls)
+        domain_mesh.to_stl("", "test_domain_from_meshes_with_bbox")        
