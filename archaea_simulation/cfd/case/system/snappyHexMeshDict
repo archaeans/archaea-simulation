@@ -25,6 +25,8 @@ geometry
 
     // context meshes to replace
 
+    // refinement mesh to replace
+
     // refinementBox
     // {
     //     type searchableBox;
@@ -52,11 +54,13 @@ castellatedMeshControls
 
     refinementRegions
     {
-        refinementBox
-        {
-            mode    inside;
-            level   2;
-        }
+        // refinement mesh refinementRegions to replace
+        
+        // refinementBox
+        // {
+        //     mode    inside;
+        //     level   2;
+        // }
     }
 
     // location in mesh to replace

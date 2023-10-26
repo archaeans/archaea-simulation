@@ -101,8 +101,7 @@ class TestDomain(unittest.TestCase):
 
         mesh = Mesh()
         faces = zone_without_hole.create_solid_faces()
-        for face in faces:
-            mesh.add_polygon(face.outer_loop.points[:-1])
+        mesh.add_from_faces(faces)
         mesh.to_stl("", "test_domain_from_meshes_with_bbox_context")
 
         # Act

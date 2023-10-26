@@ -16,9 +16,10 @@ from archaea.geometry.plane import Plane
 
 from archaea_simulation.simulation_objects.wall import Wall
 from archaea_simulation.simulation_objects.zone import Zone
-from archaea_simulation.cfd.utils.snappyHexMeshDict import snappy_hex_mesh_geometry, snappy_hex_mesh_refinementSurfaces, snappy_hex_mesh_features
+from archaea_simulation.cfd.utils.snappyHexMeshDict import snappy_hex_mesh_geometry, snappy_hex_mesh_refinementSurfaces, snappy_hex_mesh_features, snappy_hex_mesh_refinementRegions
 from archaea_simulation.cfd.utils.surfaceFeaturesDict import surface_features_entry
 from archaea_simulation.cfd.utils.initialConditions import calculate_u_inlet
+from archaea_simulation.cfd.utils.refinementBox import create_refinement_box_mesh
 
 class Domain(Zone):
     bbox: BoundingBox
@@ -32,6 +33,8 @@ class Domain(Zone):
     zones: "list[Zone]"
     context: "list[Wall]"
     context_meshes: "list[Mesh]"
+    # refinement_meshes: "list[Mesh]"
+    refinement_mesh: Mesh
     openings: "list[Wall]"
     MIN_DOMAIN_SIZE = 10
     x_scale: float
@@ -50,7 +53,10 @@ class Domain(Zone):
                  wind_direction: float = 0,
                  zones=None,
                  context=None,
-                 context_meshes=None):
+                 context_meshes=None,
+                 refinement_mesh=None):
+        self.refinement_meshes = []
+        self.refinement_mesh = refinement_mesh
         if context is None:
             self.context = []
         else:
@@ -79,17 +85,18 @@ class Domain(Zone):
 
     @classmethod
     def from_meshes(
-        cls, meshes: "list[Mesh]", 
+        cls, 
+        meshes: "list[Mesh]", 
         x_scale: float = 5, 
         y_scale: float = 5, 
         z_scale: float = 3, 
         wind_speed: float = 10,
-        wind_direction: float = 0
+        wind_direction: float = 15
         ):
         mesh_vertices = [mesh.vertices for mesh in meshes]
         vertices = list(itertools.chain.from_iterable(mesh_vertices))
 
-        # Calculate the radians based on the given degree
+        # Calculate the radians based on the given degree, we use different rotation for angles.
         radians = math.radians(-wind_direction)
 
         # Calculate the u and v vectors using trigonometry
@@ -99,6 +106,7 @@ class Domain(Zone):
         plane = Plane(Point3d.origin(), u_axis, v_axis)
         bbox = BoundingBox.from_points_in_plane(vertices, plane)
         center = plane.point_at(bbox.center.x, bbox.center.y)
+        refinement_mesh_level_1 = create_refinement_box_mesh(bbox, 1.5)
         x_dist = abs(bbox.max.x - bbox.min.x)
         y_dist = abs(bbox.max.y - bbox.min.y)
         z_dist = abs(bbox.max.z - bbox.min.z)
@@ -114,6 +122,7 @@ class Domain(Zone):
             wind_speed=wind_speed
             )
         domain.context_meshes = meshes
+        domain.refinement_mesh = refinement_mesh_level_1
         return domain
     
     def init_corners(self):
@@ -129,13 +138,6 @@ class Domain(Zone):
         self.p7 = self.p3.move(Vector3d(0, 0, self.z))
 
     def init_ground(self) -> Face:
-        c = self.center
-        # ground_outer_loop = Loop([
-        #     c.move(Vector3d(self.x / 2 * -1, self.y / 2 * -1, 0)),  # left-bottom
-        #     c.move(Vector3d(self.x / 2 * -1, self.y / 2, 0)),  # left-top
-        #     c.move(Vector3d(self.x / 2, self.y / 2, 0)),  # right-top
-        #     c.move(Vector3d(self.x / 2, self.y / 2 * -1, 0)),  # right-bottom
-        # ])
         ground_outer_loop = Loop([self.p0, self.p3, self.p2, self.p1])
         ground_inner_loops = [zone.floor.wall_border for zone in self.zones if zone.floor.wall_border.normal.z == 0]
         ground = Face(ground_outer_loop, ground_inner_loops)
@@ -210,6 +212,11 @@ class Domain(Zone):
             with fileinput.FileInput(surface_features_dict_path, inplace=True) as file:
                 for line in file:
                     print(line.replace('// context meshes to replace', context_meshes_entry), end='')
+        if self.refinement_mesh is not None:
+            refinement_mesh_entry = surface_features_entry("refinement_mesh")
+            with fileinput.FileInput(surface_features_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// refinement mesh to replace', refinement_mesh_entry), end='')
 
     def update_snappy_hex_mesh_dict(self, case_folder_path):
         """Snappy hex mesh dict defines which meshes will be considered
@@ -246,12 +253,25 @@ class Domain(Zone):
                 for line in file:
                     print(line.replace('// context meshes refinementSurfaces to replace', context_meshes_refinement_entry), end='')
 
-            in_mesh_point = self.p0.move(self.p0.vector_to(self.center).normalized())
-            location_in_mesh = f'locationInMesh ({in_mesh_point.x} {in_mesh_point.y} {self.center.z + 1});'
+        if self.refinement_mesh is not None:
+            refinement_mesh_entry = snappy_hex_mesh_geometry("refinement_mesh", "refinement_mesh")
+            refinement_mesh_features_entry = snappy_hex_mesh_features("refinement_mesh", 1)
+            refinement_mesh_refinement_entry = snappy_hex_mesh_refinementRegions("context_meshes", 1)
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
-                    print(line.replace('// location in mesh to replace', location_in_mesh), end='')
-        
+                    print(line.replace('// refinement mesh to replace', refinement_mesh_entry), end='')
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// refinement mesh features to replace', refinement_mesh_features_entry), end='')
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// refinement mesh refinementRegions to replace', refinement_mesh_refinement_entry), end='')
+
+        in_mesh_point = self.p0.move(self.p0.vector_to(self.center).normalized())
+        location_in_mesh = f'locationInMesh ({in_mesh_point.x} {in_mesh_point.y} {self.center.z + 1});'
+        with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+            for line in file:
+                print(line.replace('// location in mesh to replace', location_in_mesh), end='')
 
     def update_block_mesh_dict(self, case_folder_path):
         block_mesh_dict_path = os.path.join(case_folder_path, "system", "blockMeshDict")
@@ -290,6 +310,7 @@ class Domain(Zone):
         self.export_sides_to_stl(path)
         self.export_all_to_single_stl(path)
         self.export_context_meshes_to_stl(path)
+        self.export_refinement_meshes_to_stl(path)
 
     def export_domain_to_single_mesh(self):
         mesh = Mesh()
@@ -351,6 +372,14 @@ class Domain(Zone):
                         vertices.append(context_m.vertices[index])
                     mesh.add_polygon(vertices)
             mesh.to_stl(path, "context_meshes")
+    
+    def export_refinement_meshes_to_stl(self, path):
+        # TODO: When we have multiple refinement box
+        # if any(self.refinement_meshes):
+        #     for refinement_m in self.refinement_meshes:
+        #         refinement_m.to_stl(path, "refinement")
+        if self.refinement_mesh is not None:
+            self.refinement_mesh.to_stl(path, "refinement_box")
 
     def export_inlet_to_stl(self, path):
         mesh = Mesh()
