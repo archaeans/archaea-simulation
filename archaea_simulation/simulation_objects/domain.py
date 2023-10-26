@@ -256,7 +256,7 @@ class Domain(Zone):
         if self.refinement_mesh is not None:
             refinement_mesh_entry = snappy_hex_mesh_geometry("refinement_mesh", "refinement_mesh")
             refinement_mesh_features_entry = snappy_hex_mesh_features("refinement_mesh", 1)
-            refinement_mesh_refinement_entry = snappy_hex_mesh_refinementRegions("context_meshes", 1)
+            refinement_mesh_refinement_entry = snappy_hex_mesh_refinementRegions("refinement_mesh", 2)
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
                     print(line.replace('// refinement mesh to replace', refinement_mesh_entry), end='')
@@ -276,7 +276,7 @@ class Domain(Zone):
     def update_block_mesh_dict(self, case_folder_path):
         block_mesh_dict_path = os.path.join(case_folder_path, "system", "blockMeshDict")
 
-        cells = 'x\t{x};\n    y\t{y};\n    z\t{z};'.format(x=int(self.x), y=int(self.y), z=int(self.z))
+        cells = 'x\t{x};\n    y\t{y};\n    z\t{z};'.format(x=int(self.x / 2), y=int(self.y / 2), z=int(self.z / 2))
         vertices = '({x0}\t{y0}\t{z0})\n    ' \
                    '({x1}\t{y1}\t{z1})\n    ' \
                    '({x2}\t{y2}\t{z2})\n    ' \
@@ -379,7 +379,7 @@ class Domain(Zone):
         #     for refinement_m in self.refinement_meshes:
         #         refinement_m.to_stl(path, "refinement")
         if self.refinement_mesh is not None:
-            self.refinement_mesh.to_stl(path, "refinement_box")
+            self.refinement_mesh.to_stl(path, "refinement_mesh")
 
     def export_inlet_to_stl(self, path):
         mesh = Mesh()
