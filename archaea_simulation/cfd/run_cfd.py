@@ -232,8 +232,9 @@ def run_cfd(argv):
         vtk_file = os.path.join(case_folder, 'postProcessing',
                             'cutPlaneSurface', '400', 'U_cutPlane.vtk')
 
-        result_mesh = vtk_to_speckle(vtk_file)
-        base.Results = [result_mesh]
+        legend_point = Point3d(domain.center.x + (domain.x / 2) + 5, domain.center.y - (domain.y / 2), 0)
+        result_meshes = vtk_to_speckle(vtk_file, legend_point)
+        base.Results = result_meshes
 
         obj_id = operations.send(base, [transport])
 
