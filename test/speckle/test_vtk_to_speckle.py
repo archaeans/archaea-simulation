@@ -1,6 +1,7 @@
 import unittest
 import os
 
+from archaea.geometry.point3d import Point3d
 from archaea_simulation.speckle.vtk_to_speckle import vtk_to_speckle
 
 
@@ -13,5 +14,5 @@ class TestDomain(unittest.TestCase):
         print(Setup.path)
 
         # Act
-        vtk_to_speckle(Setup.path)
+        vtk_to_speckle(Setup.path, Point3d.origin())
         
