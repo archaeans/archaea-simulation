@@ -20,6 +20,7 @@ from archaea_simulation.cfd.utils.snappyHexMeshDict import snappy_hex_mesh_geome
 from archaea_simulation.cfd.utils.surfaceFeaturesDict import surface_features_entry
 from archaea_simulation.cfd.utils.initialConditions import calculate_u_inlet
 from archaea_simulation.cfd.utils.refinementBox import create_refinement_box_mesh
+from archaea_simulation.cfd.utils.decomposition import hiearchical_coeffs 
 
 class Domain(Zone):
     bbox: BoundingBox
@@ -168,7 +169,7 @@ class Domain(Zone):
             faces += zone.create_solid_faces()
         return faces
 
-    def create_case(self, case_folder_path):
+    def create_case(self, case_folder_path, number_of_cores: int = 6):
         if os.path.exists(case_folder_path):
             # Remove folder and files if any
             shutil.rmtree(case_folder_path)
@@ -180,11 +181,22 @@ class Domain(Zone):
         # Create path to create stl files
         trisurface_path = os.path.join(case_folder_path, "constant", "triSurface")
         self.export_domain_to_stl(trisurface_path)
+        self.update_decompose_par_dict(case_folder_path, number_of_cores)
         self.update_block_mesh_dict(case_folder_path)
         self.update_snappy_hex_mesh_dict(case_folder_path)
         self.update_surface_features_dict(case_folder_path)
         self.update_initial_conditions(case_folder_path)
         self.update_cut_plane_surface(case_folder_path)
+
+    def update_decompose_par_dict(self, case_folder_path, number_of_cores):
+        decompose_par_dict_path = os.path.join(case_folder_path, "system", "decomposeParDict")
+        hiearchical_coeffs_str = hiearchical_coeffs(number_of_cores)
+        with fileinput.FileInput(decompose_par_dict_path, inplace=True) as file:
+            for line in file:
+                print(line.replace('// number of subdomains to replace', f'numberOfSubdomains {number_of_cores};'), end='')
+        with fileinput.FileInput(decompose_par_dict_path, inplace=True) as file:
+            for line in file:
+                print(line.replace('// hierarchicalCoeffs to replace', hiearchical_coeffs_str), end='')
 
     def update_cut_plane_surface(self, case_folder_path):
         cut_plane_surface_dict_path = os.path.join(case_folder_path, "system", "cutPlaneSurface")
