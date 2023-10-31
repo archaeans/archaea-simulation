@@ -99,7 +99,7 @@ class Domain(Zone):
         vertices = list(itertools.chain.from_iterable(mesh_vertices))
 
         # Calculate the radians based on the given degree, we use different rotation for angles.
-        radians = math.radians(-wind_direction)
+        radians = math.radians(wind_direction)
 
         # Calculate the u and v vectors using trigonometry
         u_axis = Vector3d(math.cos(radians), math.sin(radians), 0)
