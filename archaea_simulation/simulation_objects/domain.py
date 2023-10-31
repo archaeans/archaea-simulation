@@ -20,7 +20,7 @@ from archaea_simulation.cfd.utils.snappyHexMeshDict import snappy_hex_mesh_geome
 from archaea_simulation.cfd.utils.surfaceFeaturesDict import surface_features_entry
 from archaea_simulation.cfd.utils.initialConditions import calculate_u_inlet
 from archaea_simulation.cfd.utils.refinementBox import create_refinement_box_mesh
-from archaea_simulation.cfd.utils.decomposition import hiearchical_coeffs 
+from archaea_simulation.cfd.utils.decomposition import hiearchical_coeffs
 
 class Domain(Zone):
     bbox: BoundingBox
@@ -98,14 +98,7 @@ class Domain(Zone):
         mesh_vertices = [mesh.vertices for mesh in meshes]
         vertices = list(itertools.chain.from_iterable(mesh_vertices))
 
-        # Calculate the radians based on the given degree, we use different rotation for angles.
-        radians = math.radians(wind_direction)
-
-        # Calculate the u and v vectors using trigonometry
-        u_axis = Vector3d(math.cos(radians), math.sin(radians), 0)
-        v_axis = Vector3d(-math.sin(radians), math.cos(radians), 0)
-
-        plane = Plane(Point3d.origin(), u_axis, v_axis)
+        plane = Plane.get_xy_plane_for_angle(wind_direction)
         bbox = BoundingBox.from_points_in_plane(vertices, plane)
         center = plane.point_at(bbox.center.x, bbox.center.y)
         refinement_mesh_level_1, points = create_refinement_box_mesh(bbox, 1.5)
