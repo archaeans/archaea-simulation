@@ -18,7 +18,6 @@ from archaea_simulation.simulation_objects.wall import Wall
 from archaea_simulation.simulation_objects.zone import Zone
 from archaea_simulation.cfd.utils.snappyHexMeshDict import snappy_hex_mesh_geometry, snappy_hex_mesh_refinementSurfaces, snappy_hex_mesh_features, snappy_hex_mesh_refinementRegions
 from archaea_simulation.cfd.utils.surfaceFeaturesDict import surface_features_entry
-from archaea_simulation.cfd.utils.initialConditions import calculate_u_inlet
 from archaea_simulation.cfd.utils.refinementBox import create_refinement_box_mesh
 from archaea_simulation.cfd.utils.decomposition import hiearchical_coeffs
 
@@ -204,8 +203,8 @@ class Domain(Zone):
 
     def update_initial_conditions(self, case_folder_path):
         u_file = os.path.join(case_folder_path, "0", "U")
-        u_x, u_y = calculate_u_inlet(self.wind_direction, self.wind_speed)
-        u_inlet_str = f"Uinlet ({u_x} {u_y} 0);"
+        v = Vector3d.from_azimuth_angle(self.wind_direction).scale(self.wind_speed)
+        u_inlet_str = f"Uinlet ({v.x} {v.y} 0);"
         with fileinput.FileInput(u_file, inplace=True) as file:
                 for line in file:
                     print(line.replace('// Uinlet to replace', u_inlet_str), end='')

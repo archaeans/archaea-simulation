@@ -45,13 +45,13 @@ files = [
 
 [[package]]
 name = "archaea"
-version = "1.1.27"
+version = "1.1.28"
 description = "Playground for geometry."
 optional = false
 python-versions = ">=3.10,<4.0"
 files = [
-    {file = "archaea-1.1.27-py3-none-any.whl", hash = "sha256:1c8225cfb8c2adf51e328a2f38138a1595cf328813b428fff36a902f69fcb036"},
-    {file = "archaea-1.1.27.tar.gz", hash = "sha256:27e7daadd608c716b4a74a2eedad5727b1c298a20e688ba853b5f8d8a6615703"},
+    {file = "archaea-1.1.28-py3-none-any.whl", hash = "sha256:fd927244fe87dd1c0d8fc6a7dd09ae3848d3bcbce64b9e85a3254da8fa820321"},
+    {file = "archaea-1.1.28.tar.gz", hash = "sha256:d4795cc60259ac3945164002b1600ff23a8433579afb7664039e642386f6c5f3"},
 ]
 
 [package.dependencies]
@@ -2448,4 +2448,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "7e392553d5ec82e3f352574e7f4923bd1f330ed70825e4d39cf9df557a54b750"
+content-hash = "c3ebfb76ddb8be923073fc2675875e21f7d2011de90ea27c7e809a03b0d49e8e"
