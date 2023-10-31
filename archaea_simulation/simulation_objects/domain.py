@@ -93,7 +93,7 @@ class Domain(Zone):
         y_scale: float = 5, 
         z_scale: float = 3, 
         wind_speed: float = 10,
-        wind_direction: float = 15
+        wind_direction: float = 0
         ):
         mesh_vertices = [mesh.vertices for mesh in meshes]
         vertices = list(itertools.chain.from_iterable(mesh_vertices))
@@ -211,10 +211,11 @@ class Domain(Zone):
 
     def update_initial_conditions(self, case_folder_path):
         u_file = os.path.join(case_folder_path, "0", "U")
-        u_inlet = calculate_u_inlet(self.wind_direction, self.wind_speed)
+        u_x, u_y = calculate_u_inlet(self.wind_direction, self.wind_speed)
+        u_inlet_str = f"Uinlet ({u_x} {u_y} 0);"
         with fileinput.FileInput(u_file, inplace=True) as file:
                 for line in file:
-                    print(line.replace('// Uinlet to replace', u_inlet), end='')
+                    print(line.replace('// Uinlet to replace', u_inlet_str), end='')
 
     def update_surface_features_dict(self, case_folder_path):
         surface_features_dict_path = os.path.join(case_folder_path, "system", "surfaceFeaturesDict")
