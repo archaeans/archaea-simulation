@@ -36,6 +36,7 @@ class Domain(Zone):
     context_meshes: "list[Mesh]"
     # refinement_meshes: "list[Mesh]"
     refinement_mesh: Mesh
+    subdomain_corners: "list[Point3d]"
     openings: "list[Wall]"
     MIN_DOMAIN_SIZE = 10
     x_scale: float
@@ -124,6 +125,7 @@ class Domain(Zone):
             )
         domain.context_meshes = meshes
         domain.refinement_mesh = refinement_mesh_level_1
+        domain.subdomain_corners = points
         return domain
     
     def init_corners(self):
