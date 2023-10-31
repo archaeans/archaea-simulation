@@ -98,7 +98,7 @@ class Domain(Zone):
         mesh_vertices = [mesh.vertices for mesh in meshes]
         vertices = list(itertools.chain.from_iterable(mesh_vertices))
 
-        plane = Plane.get_xy_plane_for_angle(wind_direction)
+        plane = Plane.get_xy_plane_for_angle(Point3d.origin(), wind_direction)
         bbox = BoundingBox.from_points_in_plane(vertices, plane)
         center = plane.point_at(bbox.center.x, bbox.center.y)
         refinement_mesh_level_1, points = create_refinement_box_mesh(bbox, 1.5)
