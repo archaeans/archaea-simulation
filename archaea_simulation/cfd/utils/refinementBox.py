@@ -33,6 +33,11 @@ def create_refinement_box_mesh(bbox: BoundingBox, scale: float):
     p2 = Point3d(global_scaled_max.x, global_scaled_max.y, global_scaled_min.z)
     p3 = Point3d(global_scaled_corner_2.x, global_scaled_corner_2.y, global_scaled_min.z)
 
+    p4 = p0.move(Vector3d(0, 0, scaled_height))
+    p5 = p1.move(Vector3d(0, 0, scaled_height))
+    p6 = p2.move(Vector3d(0, 0, scaled_height))
+    p7 = p3.move(Vector3d(0, 0, scaled_height))
+
     ground_loop_1 = Loop([p0, p3, p2, p1])
     ground_face_1 = Face(ground_loop_1)
     zone_without_hole = Zone(ground_face_1, scaled_height)
@@ -40,4 +45,4 @@ def create_refinement_box_mesh(bbox: BoundingBox, scale: float):
     faces = zone_without_hole.create_solid_faces()
     mesh.add_from_faces(faces)
 
-    return mesh
+    return mesh, [p0, p1, p2, p3, p4, p5, p6, p7]

@@ -107,7 +107,7 @@ class Domain(Zone):
         plane = Plane(Point3d.origin(), u_axis, v_axis)
         bbox = BoundingBox.from_points_in_plane(vertices, plane)
         center = plane.point_at(bbox.center.x, bbox.center.y)
-        refinement_mesh_level_1 = create_refinement_box_mesh(bbox, 1.5)
+        refinement_mesh_level_1, points = create_refinement_box_mesh(bbox, 1.5)
         x_dist = abs(bbox.max.x - bbox.min.x)
         y_dist = abs(bbox.max.y - bbox.min.y)
         z_dist = abs(bbox.max.z - bbox.min.z)
@@ -137,6 +137,8 @@ class Domain(Zone):
         self.p5 = self.p1.move(Vector3d(0, 0, self.z))
         self.p6 = self.p2.move(Vector3d(0, 0, self.z))
         self.p7 = self.p3.move(Vector3d(0, 0, self.z))
+        self.corners = [self.p0, self.p1, self.p2, self.p3,
+                        self.p4, self.p5, self.p6, self.p7]
 
     def init_ground(self) -> Face:
         ground_outer_loop = Loop([self.p0, self.p3, self.p2, self.p1])
