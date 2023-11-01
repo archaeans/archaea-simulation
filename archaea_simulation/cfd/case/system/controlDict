@@ -47,4 +47,6 @@ runTimeModifiable true;
 
 // maxCo           1;
 
+libs ("libatmosphericModels.so");
+
 // ************************************************************************* //

@@ -15,27 +15,32 @@ FoamFile
 
 // Uinlet to replace
 
+#include        "include/initialConditions"
+
 dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform (0 0 0);
+internalField   uniform $flowVelocity;
 
 boundaryField
 {
     inlet
     {
-        type            fixedValue;
-        value           uniform $Uinlet;
+        type            atmBoundaryLayerInletVelocity;
+        #include        "include/ABLConditions"
     }
 
     outlet
     {
-        type            pressureInletOutletVelocity;
-        value           uniform (0 0 0);
+        type            inletOutlet;
+        inletValue      uniform (0 0 0);
+        value           $internalField;
     }
 
     wall
     {
-        type            noSlip;
+        type            uniformFixedValue;
+        uniformValue    (0 0 0);
+        value           uniform (0 0 0);
     }
 
     #includeEtc "caseDicts/setConstraintTypes"

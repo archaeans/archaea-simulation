@@ -205,9 +205,9 @@ class Domain(Zone):
         u_file = os.path.join(case_folder_path, "0", "U")
         v = Vector3d.from_azimuth_angle(self.wind_direction).scale(self.wind_speed)
         u_inlet_str = f"Uinlet ({v.x} {v.y} 0);"
-        with fileinput.FileInput(u_file, inplace=True) as file:
-                for line in file:
-                    print(line.replace('// Uinlet to replace', u_inlet_str), end='')
+        # with fileinput.FileInput(u_file, inplace=True) as file:
+        #         for line in file:
+        #             print(line.replace('// Uinlet to replace', u_inlet_str), end='')
 
     def update_surface_features_dict(self, case_folder_path):
         surface_features_dict_path = os.path.join(case_folder_path, "system", "surfaceFeaturesDict")

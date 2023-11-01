@@ -19,6 +19,8 @@ internalField   uniform 0;
 
 boundaryField
 {
+    #include "include/ABLConditions"
+
     inlet
     {
         type            calculated;
@@ -33,7 +35,8 @@ boundaryField
 
     wall
     {
-        type            nutkWallFunction;
+        type            nutkAtmRoughWallFunction;
+        z0              $z0;
         value           uniform 0;
     }
 

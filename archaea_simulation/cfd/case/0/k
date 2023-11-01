@@ -13,31 +13,33 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-kInlet          1.5;   // approx k = 1.5*(I*U)^2 ; I = 0.1
+// kInlet          1.5;   // approx k = 1.5*(I*U)^2 ; I = 0.1
+
+#include        "include/initialConditions"
 
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform $kInlet;
+internalField   uniform $turbulentKE;
 
 boundaryField
 {
     inlet
     {
-        type            fixedValue;
-        value           uniform $kInlet;
+        type            atmBoundaryLayerInletK;
+        #include        "include/ABLConditions"
     }
 
     outlet
     {
         type            inletOutlet;
-        inletValue      uniform $kInlet;
-        value           uniform $kInlet;
+        inletValue      uniform $turbulentKE;
+        value           $internalField;
     }
 
     wall
     {
         type            kqRWallFunction;
-        value           uniform $kInlet;
+        value           uniform 0.0;
     }
 
     #includeEtc "caseDicts/setConstraintTypes"

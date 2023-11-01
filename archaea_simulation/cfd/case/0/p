@@ -13,9 +13,11 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include        "include/initialConditions"
+
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 0;
+internalField   uniform $pressure;
 
 boundaryField
 {
@@ -26,10 +28,8 @@ boundaryField
 
     outlet
     {
-        type            totalPressure;
-        p0              uniform 0;
-        gamma           1.4;
-        value           uniform 0;
+        type            uniformFixedValue;
+        uniformValue    constant $pressure;
     }
 
     wall
