@@ -40,6 +40,12 @@ boundaryField
         value           uniform 0;
     }
 
+    ground
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
     #includeEtc "caseDicts/setConstraintTypes"
 }
 

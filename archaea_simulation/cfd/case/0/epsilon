@@ -15,9 +15,9 @@ FoamFile
 
 // epsilonInlet  0.03; // Cmu^0.75 * k^1.5 / L ; L =10
 
-#include        "include/initialConditions"
-
 dimensions      [0 2 -3 0 0 0 0];
+
+#include        "include/initialConditions"
 
 internalField   uniform $turbulentEpsilon;
 
@@ -43,6 +43,11 @@ boundaryField
         kappa           0.4;
         E               9.8;
         value           $internalField;
+    }
+
+    ground
+    {
+        type            zeroGradient;
     }
 
     #includeEtc "caseDicts/setConstraintTypes"

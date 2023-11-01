@@ -37,6 +37,11 @@ boundaryField
         type            zeroGradient;
     }
 
+    ground
+    {
+        type            zeroGradient;
+    }
+
     #includeEtc "caseDicts/setConstraintTypes"
 }
 

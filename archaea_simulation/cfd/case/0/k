@@ -23,12 +23,6 @@ internalField   uniform $turbulentKE;
 
 boundaryField
 {
-    inlet
-    {
-        type            atmBoundaryLayerInletK;
-        #include        "include/ABLConditions"
-    }
-
     outlet
     {
         type            inletOutlet;
@@ -36,10 +30,21 @@ boundaryField
         value           $internalField;
     }
 
+    inlet
+    {
+        type            atmBoundaryLayerInletK;
+        #include        "include/ABLConditions"
+    }
+
     wall
     {
         type            kqRWallFunction;
         value           uniform 0.0;
+    }
+
+    ground
+    {
+        type            zeroGradient;
     }
 
     #includeEtc "caseDicts/setConstraintTypes"
