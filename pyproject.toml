@@ -30,7 +30,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.10"
 archaea = "1.1.28"
-specklepy = "^2.17.5"
+specklepy = "2.17.11"
 vtk = "^9.2.6"
 
 [tool.poetry.group.dev.dependencies]
