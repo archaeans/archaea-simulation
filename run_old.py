@@ -1,3 +1,4 @@
+import argparse
 import sys
 import os
 import getopt
@@ -11,7 +12,7 @@ from specklepy.objects.geometry import Mesh, Base
 from archaea_simulation.speckle.account import get_auth_speckle_client
 from archaea_simulation.speckle.vtk_to_speckle import vtk_to_speckle
 from archaea_simulation.simulation_objects.domain import Domain
-from archaea_simulation.cfd.utils.path import get_cfd_export_foam_path
+from archaea_simulation.cfd.utils.path import get_cfd_export_path, get_bes_export_path
 from archaea_simulation.simulation_objects.courtyard_building import CourtyardBuilding
 
 
@@ -41,8 +42,8 @@ def run_cfd(argv):
     arg_help = "{0}\n\n" \
                "Welcome to stl exporter program for cfd calculations! \n" \
                "Use below flags to generate stl.\n" \
-               " -n\t--name                        <name>                    default: test\n" \
-               " -x\t--exec                        <exec>                    default: 0\n" \
+               " -n\t--name                        <name>                   default: test\n" \
+               " -x\t--exec                        <exec>                   default: 0\n" \
                " -ws\t--wind-speed                 <wind_speed>              default: 10\n" \
                " -wd\t--wind-direction             <wind_direction>          default: 0\n" \
                " -dw\t--domain-width               <domain_width>            default: 100.0\n" \
@@ -217,19 +218,20 @@ def run_cfd(argv):
     base.Buildings = [zones_mesh]
     base.Context = [context_mesh]
 
-    archaea_folder = get_cfd_export_foam_path()
-    if not os.path.exists(archaea_folder):
-        os.makedirs(archaea_folder)
+    cfd_case_folder = get_cfd_export_path(arg_name)
+    bes_case_folder = get_bes_export_path(arg_name)
+    if not os.path.exists(cfd_case_folder):
+        os.makedirs(cfd_case_folder)
 
-    case_folder = os.path.join(archaea_folder, arg_name)
-    domain.create_cfd_case(case_folder)
+    domain.create_cfd_case(cfd_case_folder)
+    domain.create_bes_case(bes_case_folder, arg_name, "ddy_file_path")
 
     if arg_exec:
-        cmd = os.path.join(case_folder, './Allrun')
+        cmd = os.path.join(cfd_case_folder, './Allrun')
         completed_process = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         print(completed_process.stdout)
 
-        vtk_file = os.path.join(case_folder, 'postProcessing',
+        vtk_file = os.path.join(cfd_case_folder, 'postProcessing',
                             'cutPlaneSurface', '400', 'U_cutPlane.vtk')
 
         legend_point = Point3d(domain.center.x + (domain.x / 2) + 5, domain.center.y - (domain.y / 2), 0)
