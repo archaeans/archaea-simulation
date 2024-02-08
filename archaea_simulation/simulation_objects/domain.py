@@ -6,6 +6,15 @@ import math
 from distutils.dir_util import copy_tree as copytree
 from pathlib import Path
 
+
+from ladybug.futil import write_to_file
+from ladybug.analysisperiod import AnalysisPeriod
+from honeybee_energy.simulation.runperiod import RunPeriod
+from honeybee_energy.simulation.shadowcalculation import ShadowCalculation
+from honeybee.model import Model
+from honeybee.room import Room
+from honeybee_energy.simulation.parameter import SimulationParameter
+
 from archaea.geometry.bounding_box import BoundingBox
 from archaea.geometry.face import Face
 from archaea.geometry.loop import Loop
@@ -20,6 +29,9 @@ from archaea_simulation.cfd.utils.snappyHexMeshDict import snappy_hex_mesh_geome
 from archaea_simulation.cfd.utils.surfaceFeaturesDict import surface_features_entry
 from archaea_simulation.cfd.utils.refinementBox import create_refinement_box_mesh
 from archaea_simulation.cfd.utils.decomposition import hiearchical_coeffs
+
+from archaea_simulation.bes.create_idf import create_idf
+
 
 class Domain(Zone):
     bbox: BoundingBox
@@ -119,6 +131,7 @@ class Domain(Zone):
         domain.refinement_mesh = refinement_mesh_level_1
         domain.subdomain_corners = points
         return domain
+        
     
     def init_corners(self):
         c = self.center
@@ -165,7 +178,12 @@ class Domain(Zone):
             faces += zone.create_solid_faces()
         return faces
 
-    def create_case(self, case_folder_path, number_of_cores: int = 6):
+    def create_bes_case(self, case_folder_path, case_name, ddy_file_path):
+        thermal_rooms = [tz.room for tz in self.collect_thermal_zones()]
+        idf_file_path = create_idf(thermal_rooms, case_folder_path, case_name, ddy_file_path)
+        return idf_file_path
+
+    def create_cfd_case(self, case_folder_path, number_of_cores: int = 6):
         if os.path.exists(case_folder_path):
             # Remove folder and files if any
             shutil.rmtree(case_folder_path)
@@ -404,3 +422,6 @@ class Domain(Zone):
         mesh = Mesh()
         mesh.add_from_faces([self.walls[0], self.walls[2], self.floor.reverse(), self.ceiling.reverse()])
         mesh.to_stl(path, "sides")
+
+    def collect_thermal_zones(self):
+        return [z.convert_to_thermal_zone(str(i)) for i, z in enumerate(self.zones)]

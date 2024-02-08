@@ -53,6 +53,7 @@ class CourtyardBuilding:
         x_center_distance_first_room = building_block_width / 2
         y_shift = self.courtyard_width / 2
 
+        
         zones: list[Zone] = []
         self.create_block_zones(x_center_distance_first_room, -y_shift - self.room_depth, zones)
         self.zones = zones
