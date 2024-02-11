@@ -178,9 +178,9 @@ class Domain(Zone):
             faces += zone.create_solid_faces()
         return faces
 
-    def create_bes_case(self, case_folder_path, case_name, ddy_file_path):
+    def create_bes_case(self, case_folder_path, case_name, ddy_file_path, epw_file_path):
         thermal_rooms = [tz.room for tz in self.collect_thermal_zones()]
-        idf_file_path = create_idf(thermal_rooms, case_folder_path, case_name, ddy_file_path)
+        idf_file_path = create_idf(thermal_rooms, case_folder_path, case_name, ddy_file_path, epw_file_path)
         return idf_file_path
 
     def create_cfd_case(self, case_folder_path, number_of_cores: int = 6):

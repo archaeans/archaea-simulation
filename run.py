@@ -158,24 +158,26 @@ def run(argv):
         os.makedirs(cfd_case_folder)
 
     domain.create_cfd_case(cfd_case_folder)
-    idf_file_path = domain.create_bes_case(bes_case_folder, arg_name, arg_ddy_path)
+    idf_file_path = domain.create_bes_case(bes_case_folder, arg_name, arg_ddy_path, arg_epw_path)
 
     if arg_exec:
         print("##################################")
         print("### BUILDING ENERGY SIMULATION ###")
         print("##################################\n")
 
-        cmd_bes = [
-            "/usr/local/EnergyPlus-23-2-0/energyplus", 
+        out_path = os.path.join(bes_case_folder, "run")
+
+        cmd_bes_osw = [
+            "/usr/local/openstudio-3.6.1/EnergyPlus/energyplus",
             "-w", arg_epw_path,
-            "-d", bes_case_folder,
-            idf_file_path
+            "-d", out_path,
+            "-i", "/usr/local/openstudio-3.6.1/EnergyPlus/Energy+.idd",
+            "-x", idf_file_path
         ]
 
-        completed_process_bes = subprocess.run(cmd_bes, shell=False)
+        completed_process_bes = subprocess.run(cmd_bes_osw, shell=False)
         print(completed_process_bes.stdout)
 
-        return
 
         print("\n####################################")
         print("### COMPUTATIONAL FLUID DYNAMICS ###")
