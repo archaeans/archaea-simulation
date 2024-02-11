@@ -1,0 +1,3 @@
+[submodule "archaea_simulation/bes/honeybee-openstudio-gem"]
+	path = archaea_simulation/bes/honeybee-openstudio-gem
+	url = https://github.com/ladybug-tools/honeybee-openstudio-gem
