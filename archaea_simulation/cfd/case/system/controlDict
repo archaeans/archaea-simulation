@@ -47,4 +47,9 @@ runTimeModifiable true;
 
 // maxCo           1;
 
+functions
+{
+  #includeFunc residuals
+}
+
 // ************************************************************************* //
