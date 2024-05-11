@@ -22,7 +22,7 @@ def run(argv):
     # Define arguments
     parser.add_argument("-n", "--name", default="test", help="Project name (default: test)")
     parser.add_argument("-x", "--exec", action="store_true", help="Execute simulations (default: False)")
-    parser.add_argument("-ws", "--wind-speed", default=10.0, type=float, help="Wind speed (default: 10)")
+    parser.add_argument("-ws", "--wind-speed", default=3.0, type=float, help="Wind speed (default: 3)")
     parser.add_argument("-wd", "--wind-direction", default=0, type=float, help="Wind direction (default: 0)")
     parser.add_argument("-dw", "--domain-width", default=25.0, type=float, help="Domain width (default: 25.0)")
     parser.add_argument("-dd", "--domain-depth", default=25.0, type=float, help="Domain depth (default: 25.0)")
@@ -117,6 +117,7 @@ def run(argv):
                     float(arg_domain_width),       # x
                     float(arg_domain_depth),       # y
                     float(arg_domain_height),      # z
+                    context = courtyard_building.context_walls,
                     context_meshes = courtyard_building.context,
                     wind_direction = float(arg_wind_direction),
                     wind_speed = float(arg_wind_speed) 
@@ -186,7 +187,7 @@ def run(argv):
         completed_process_cfd = subprocess.run(cmd_cfd, shell=False)
         print(completed_process_cfd.stdout)
 
-        vtk_file = os.path.join(cfd_case_folder, 'postProcessing', 'cutPlaneSurface', '400', 'U_cutPlane.vtk')
+        vtk_file = os.path.join(cfd_case_folder, 'postProcessing', 'cutPlaneSurface', '400', 'cutPlane.vtk')
 
         legend_point = Point3d(domain.center.x + (domain.x / 2) + 5, domain.center.y - (domain.y / 2), 0)
         result_meshes = vtk_to_speckle(vtk_file, legend_point)

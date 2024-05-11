@@ -12,6 +12,7 @@ from archaea_simulation.simulation_objects.wall_type import WallType
 class CourtyardBuilding:
     zones: "list[Zone]"
     context: "list[Mesh]"
+    context_walls: "list[Wall]"
 
     def __init__(self,
                  center: Point3d,
@@ -30,6 +31,7 @@ class CourtyardBuilding:
                  room_door_height: float,
                  ):
         self.context = []
+        self.context_walls = []
         self.center = center
         self.number_of_storeys = number_of_storeys
         self.number_of_rooms = number_of_rooms
@@ -75,19 +77,22 @@ class CourtyardBuilding:
         mesh_1.add_from_face(face_1)
         mesh_2.add_from_face(face_2)
         self.context = [mesh_1, mesh_2]
+        self.context_walls = [Wall(face_1.outer_loop, []), Wall(face_2.outer_loop, [])]
 
     def create_block_zones(self, x_center_distance_first_room, y_shift, zones):
-        for i in range(self.number_of_rooms):
-            x_shift = x_center_distance_first_room - (i * self.room_width)
-            zone = self.create_zone(x_shift, y_shift, i == 0, i == self.number_of_rooms - 1)
-            zones.append(zone)
-
-    def create_zone(self, x_shift, y_shift, is_start, is_end):
+        for storey_no in range(self.number_of_storeys):
+            for j in range(self.number_of_rooms):
+                x_shift = x_center_distance_first_room - (j * self.room_width)
+                zone = self.create_zone(x_shift, y_shift, j == 0, j == self.number_of_rooms - 1, storey_no)
+                zones.append(zone)
+        
+    def create_zone(self, x_shift, y_shift, is_start, is_end, storey_no):
         c = self.center
-        p0 = Point3d(c.x + x_shift, c.y + y_shift, c.z)
-        p1 = Point3d(c.x + x_shift, c.y + y_shift + self.room_depth, c.z)
-        p2 = Point3d(c.x + x_shift - self.room_width, c.y + y_shift + self.room_depth, c.z)
-        p3 = Point3d(c.x + x_shift - self.room_width, c.y + y_shift, c.z)
+        floor_level = c.z + (storey_no * self.room_height)
+        p0 = Point3d(c.x + x_shift, c.y + y_shift, floor_level)
+        p1 = Point3d(c.x + x_shift, c.y + y_shift + self.room_depth, floor_level)
+        p2 = Point3d(c.x + x_shift - self.room_width, c.y + y_shift + self.room_depth, floor_level)
+        p3 = Point3d(c.x + x_shift - self.room_width, c.y + y_shift, floor_level)
 
         ground_loop_1 = Loop([p0, p3, p2, p1])
         ground_face_1 = Face(ground_loop_1)
@@ -123,6 +128,8 @@ class CourtyardBuilding:
         zone = Zone(
             ground_face_1,
             self.room_height,
+            storey_no == 0,
+            storey_no + 1 == self.number_of_storeys,
             walls=[window_wall, door_wall, side_wall_1, side_wall_2],
             wall_default_thickness=self.room_wall_thickness
         )
@@ -144,7 +151,7 @@ class CourtyardBuilding:
         width_ratio = (self.room_width - self.room_window_width) / self.room_window_width
 
         window_wall_loop = window_wall_line.extrude(Vector3d(0, 0, self.room_height))
-        window_wall = Wall(window_wall_loop.outer_loop, [window_loop.outer_loop], wall_type=WallType.OUTER)
+        window_wall = Wall(window_wall_loop.outer_loop, [window_loop.outer_loop], wall_type=WallType.OUTER) if self.room_window_existence else Wall(window_wall_loop.outer_loop, [], wall_type=WallType.OUTER)
 
         return window_wall
 
@@ -163,7 +170,6 @@ class CourtyardBuilding:
         width_ratio = (self.room_width - self.room_window_width) / self.room_window_width
 
         door_wall_loop = door_wall_line.extrude(Vector3d(0, 0, self.room_height))
-        door_wall = Wall(door_wall_loop.outer_loop, [door_loop.outer_loop], wall_type=WallType.OUTER)
+        door_wall = Wall(door_wall_loop.outer_loop, [door_loop.outer_loop], wall_type=WallType.OUTER) if self.room_door_existence else Wall(door_wall_loop.outer_loop, [], wall_type=WallType.OUTER)
 
         return door_wall
-

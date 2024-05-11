@@ -74,7 +74,9 @@ sides
 // 	writeObj	yes;
 // }
 
-// refinement mesh to replace
+// refinement mesh 1 to replace
+
+// refinement mesh 2 to replace
 
 #includeEtc "caseDicts/surface/surfaceFeaturesDict.cfg"
 

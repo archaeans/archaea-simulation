@@ -3,7 +3,7 @@ cd ${0%/*} || exit 1    # run from this directory
 
 total_start_time=$(date +%s.%N)
 
-source /opt/openfoam9/etc/bashrc
+source /opt/openfoam11/etc/bashrc
 
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
@@ -97,7 +97,7 @@ echo -e "###################################\n"
 
 start_time=$(date +%s.%N)
 
-simpleFoam -postProcess -func writeCellCentres
+foamPostProcess -func writeCellCentres
 
 end_time=$(date +%s.%N)
 elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")
@@ -109,8 +109,8 @@ echo -e "###################################\n"
 
 start_time=$(date +%s.%N)
 
-simpleFoam -postProcess -func cutPlaneSurface
-simpleFoam -postProcess -func probes
+foamPostProcess -func cutPlaneSurface
+foamPostProcess -func probes
 
 end_time=$(date +%s.%N)
 elapsed_time=$(awk "BEGIN {print $end_time - $start_time;}")

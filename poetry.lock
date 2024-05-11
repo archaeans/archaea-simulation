@@ -1659,6 +1659,20 @@ files = [
 pydantic = ">=1.8.2"
 
 [[package]]
+name = "pyfoam"
+version = "2023.7"
+description = "Python Utilities for OpenFOAM"
+optional = false
+python-versions = "*"
+files = [
+    {file = "PyFoam-2023.7-py2.py3-none-any.whl", hash = "sha256:a8b08cee19f0a83f8eb9397638139f310597d7a5bcf4505ab63a0697f60d1456"},
+]
+
+[package.dependencies]
+jinja2 = "*"
+numpy = "*"
+
+[[package]]
 name = "pylint"
 version = "2.17.7"
 description = "python code static checker"
@@ -2514,4 +2528,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "5f9c9e4c0ec339771f8a43e01192e0424b05973166a9954f4fc63fb3eab6c423"
+content-hash = "ae95c3d18662aa11aaabc7725f96fc4373d326c92b5d0d0c670449d22c2f8183"

@@ -47,6 +47,7 @@ class Domain(Zone):
     context_meshes: "list[Mesh]"
     # refinement_meshes: "list[Mesh]"
     refinement_mesh: Mesh
+    refinement_mesh_2: Mesh
     subdomain_corners: "list[Point3d]"
     openings: "list[Wall]"
     MIN_DOMAIN_SIZE = 10
@@ -93,7 +94,7 @@ class Domain(Zone):
         self.wind_direction = wind_direction
         self.init_corners()
         ground = self.init_ground()
-        super().__init__(ground, self.z, wall_default_thickness=0)
+        super().__init__(ground, self.z, False, False, wall_default_thickness=0)
         self.ground = self.floor
 
     @classmethod
@@ -106,13 +107,15 @@ class Domain(Zone):
         wind_speed: float = 10,
         wind_direction: float = 0
         ):
+
         mesh_vertices = [mesh.vertices for mesh in meshes]
         vertices = list(itertools.chain.from_iterable(mesh_vertices))
 
         plane = Plane.get_xy_plane_for_angle(Point3d.origin(), wind_direction)
         bbox = BoundingBox.from_points_in_plane(vertices, plane)
         center = plane.point_at(bbox.center.x, bbox.center.y)
-        refinement_mesh_level_1, points = create_refinement_box_mesh(bbox, 1.5)
+        refinement_mesh_level_1, points_1 = create_refinement_box_mesh(bbox, 3)
+        refinement_mesh_level_2, points_2 = create_refinement_box_mesh(bbox, 2)
         x_dist = abs(bbox.max.x - bbox.min.x)
         y_dist = abs(bbox.max.y - bbox.min.y)
         z_dist = abs(bbox.max.z - bbox.min.z)
@@ -129,7 +132,8 @@ class Domain(Zone):
             )
         domain.context_meshes = meshes
         domain.refinement_mesh = refinement_mesh_level_1
-        domain.subdomain_corners = points
+        domain.refinement_mesh_2 = refinement_mesh_level_2
+        domain.subdomain_corners = points_1
         return domain
         
     
@@ -180,10 +184,22 @@ class Domain(Zone):
 
     def create_bes_case(self, case_folder_path, case_name, ddy_file_path, epw_file_path):
         thermal_rooms = [tz.room for tz in self.collect_thermal_zones()]
-        idf_file_path = create_idf(thermal_rooms, case_folder_path, case_name, ddy_file_path, epw_file_path)
+        shades = [wall.convert_to_shade() for wall in self.context]
+        idf_file_path = create_idf(thermal_rooms, shades, case_folder_path, case_name, ddy_file_path, epw_file_path)
         return idf_file_path
 
     def create_cfd_case(self, case_folder_path, number_of_cores: int = 6):
+        plane = Plane.get_xy_plane_for_angle(Point3d.origin(), self.wind_direction)
+        points = []
+        for zone in self.zones:
+            points += zone.all_points()
+        bbox = BoundingBox.from_points_in_plane(points, plane)
+        refinement_mesh_level_1, points = create_refinement_box_mesh(bbox, 3)
+        refinement_mesh_level_2, points = create_refinement_box_mesh(bbox, 1.5)
+        self.refinement_mesh = refinement_mesh_level_1
+        self.refinement_mesh_2 = refinement_mesh_level_2
+        self.subdomain_corners = points
+
         if os.path.exists(case_folder_path):
             # Remove folder and files if any
             shutil.rmtree(case_folder_path)
@@ -240,10 +256,15 @@ class Domain(Zone):
                 for line in file:
                     print(line.replace('// context meshes to replace', context_meshes_entry), end='')
         if self.refinement_mesh is not None:
-            refinement_mesh_entry = surface_features_entry("refinement_mesh")
+            refinement_mesh_1_entry = surface_features_entry("refinement_mesh_1")
             with fileinput.FileInput(surface_features_dict_path, inplace=True) as file:
                 for line in file:
-                    print(line.replace('// refinement mesh to replace', refinement_mesh_entry), end='')
+                    print(line.replace('// refinement mesh 1 to replace', refinement_mesh_1_entry), end='')
+        if self.refinement_mesh_2 is not None:
+            refinement_mesh_2_entry = surface_features_entry("refinement_mesh_2")
+            with fileinput.FileInput(surface_features_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// refinement mesh 2 to replace', refinement_mesh_2_entry), end='')
 
     def update_snappy_hex_mesh_dict(self, case_folder_path):
         """Snappy hex mesh dict defines which meshes will be considered
@@ -255,7 +276,7 @@ class Domain(Zone):
         snappy_hex_mesh_dict_path = os.path.join(case_folder_path, "system", "snappyHexMeshDict")
         if any(self.zones):
             zones_entry = snappy_hex_mesh_geometry("zones", "zones")
-            zones_features_entry = snappy_hex_mesh_features("zones", 1)
+            zones_features_entry = snappy_hex_mesh_features("zones", 3)
             zones_refinement_entry = snappy_hex_mesh_refinementSurfaces("zones", 3, 3)
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
@@ -268,7 +289,7 @@ class Domain(Zone):
                     print(line.replace('// zones refinementSurfaces to replace', zones_refinement_entry), end='')
         if any(self.context_meshes):
             context_meshes_entry = snappy_hex_mesh_geometry("context_meshes", "context_meshes")
-            context_meshes_features_entry = snappy_hex_mesh_features("context_meshes", 1)
+            context_meshes_features_entry = snappy_hex_mesh_features("context_meshes", 3)
             context_meshes_refinement_entry = snappy_hex_mesh_refinementSurfaces("context_meshes", 3, 3)
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
@@ -281,18 +302,33 @@ class Domain(Zone):
                     print(line.replace('// context meshes refinementSurfaces to replace', context_meshes_refinement_entry), end='')
 
         if self.refinement_mesh is not None:
-            refinement_mesh_entry = snappy_hex_mesh_geometry("refinement_mesh", "refinement_mesh")
-            refinement_mesh_features_entry = snappy_hex_mesh_features("refinement_mesh", 1)
-            refinement_mesh_refinement_entry = snappy_hex_mesh_refinementRegions("refinement_mesh", 2)
+            refinement_mesh_1_entry = snappy_hex_mesh_geometry("refinement_mesh_1", "refinement_mesh_1")
+            refinement_mesh_2_entry = snappy_hex_mesh_geometry("refinement_mesh_2", "refinement_mesh_2")
+            refinement_mesh_1_features_entry = snappy_hex_mesh_features("refinement_mesh_1", 1)
+            refinement_mesh_2_features_entry = snappy_hex_mesh_features("refinement_mesh_2", 2)
+
+            refinement_mesh_1_refinement_entry = snappy_hex_mesh_refinementRegions("refinement_mesh_1", 1)
+            refinement_mesh_2_refinement_entry = snappy_hex_mesh_refinementRegions("refinement_mesh_2", 2)
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
-                    print(line.replace('// refinement mesh to replace', refinement_mesh_entry), end='')
+                    print(line.replace('// refinement mesh 1 to replace', refinement_mesh_1_entry), end='')
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
-                    print(line.replace('// refinement mesh features to replace', refinement_mesh_features_entry), end='')
+                    print(line.replace('// refinement mesh 2 to replace', refinement_mesh_2_entry), end='')
+            
             with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
                 for line in file:
-                    print(line.replace('// refinement mesh refinementRegions to replace', refinement_mesh_refinement_entry), end='')
+                    print(line.replace('// refinement mesh 1 features to replace', refinement_mesh_1_features_entry), end='')
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// refinement mesh 2 features to replace', refinement_mesh_2_features_entry), end='')
+
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// refinement mesh 1 refinementRegions to replace', refinement_mesh_1_refinement_entry), end='')
+            with fileinput.FileInput(snappy_hex_mesh_dict_path, inplace=True) as file:
+                for line in file:
+                    print(line.replace('// refinement mesh 2 refinementRegions to replace', refinement_mesh_2_refinement_entry), end='')
 
         in_mesh_point = self.p0.move(self.p0.vector_to(self.center).normalized())
         location_in_mesh = f'locationInMesh ({in_mesh_point.x} {in_mesh_point.y} {self.center.z + 1});'
@@ -303,7 +339,22 @@ class Domain(Zone):
     def update_block_mesh_dict(self, case_folder_path):
         block_mesh_dict_path = os.path.join(case_folder_path, "system", "blockMeshDict")
 
-        cells = 'x\t{x};\n    y\t{y};\n    z\t{z};'.format(x=int(self.x / 2), y=int(self.y / 2), z=int(self.z / 2))
+        mesh_0 = 0.71
+        mesh_1 = 1
+        mesh_2 = 1.12
+        mesh_3 = 1.25
+        mesh_4 = 1.4
+        mesh_5 = 1.56
+        mesh_6 = 1.75
+        mesh_7 = 1.95
+        mesh_8 = 2.18
+        mesh_9 = 2.44
+        mesh_10 = 2.74
+        mesh_11 = 3.06
+        mesh_12 = 3.42
+        cell_k = mesh_7 / 2
+
+        cells = 'x\t{x};\n    y\t{y};\n    z\t{z};'.format(x=int(self.x * cell_k), y=int(self.y * cell_k), z=int(self.z * cell_k))
         vertices = '({x0}\t{y0}\t{z0})\n    ' \
                    '({x1}\t{y1}\t{z1})\n    ' \
                    '({x2}\t{y2}\t{z2})\n    ' \
@@ -406,7 +457,9 @@ class Domain(Zone):
         #     for refinement_m in self.refinement_meshes:
         #         refinement_m.to_stl(path, "refinement")
         if self.refinement_mesh is not None:
-            self.refinement_mesh.to_stl(path, "refinement_mesh")
+            self.refinement_mesh.to_stl(path, "refinement_mesh_1")
+        if self.refinement_mesh_2 is not None:
+            self.refinement_mesh_2.to_stl(path, "refinement_mesh_2")
 
     def export_inlet_to_stl(self, path):
         mesh = Mesh()

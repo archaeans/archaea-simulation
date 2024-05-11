@@ -40,7 +40,7 @@ def create_refinement_box_mesh(bbox: BoundingBox, scale: float):
 
     ground_loop_1 = Loop([p0, p3, p2, p1])
     ground_face_1 = Face(ground_loop_1)
-    zone_without_hole = Zone(ground_face_1, scaled_height)
+    zone_without_hole = Zone(ground_face_1, scaled_height, False, False)
     mesh = Mesh()
     faces = zone_without_hole.create_solid_faces()
     mesh.add_from_faces(faces)

@@ -33,6 +33,7 @@ archaea = "1.1.28"
 specklepy = "2.17.17"
 vtk = "^9.2.6"
 honeybee-energy = "^1.105.15"
+pyfoam = "^2023.7"
 
 [tool.poetry.group.dev.dependencies]
 urllib3 = "1.26.17"

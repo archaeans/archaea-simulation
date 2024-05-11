@@ -1,7 +1,13 @@
+
 import functools
 from archaea.geometry.face import Face
 from archaea.geometry.loop import Loop
 from archaea_simulation.simulation_objects.wall_type import WallType
+from honeybee.face import Face as HB_Face
+from honeybee.face import Face3D as HB_Face3D
+from honeybee.shade import Shade as HB_Shade
+from ladybug_geometry.geometry3d.pointvector import Point3D as LB_Point3D
+from archaea_simulation.utils.random_generator import generate_random_string
 
 
 class Wall(Face):
@@ -46,7 +52,6 @@ class Wall(Face):
     def rotate(self, axis, angle, origin=None):
         rotated_border_points = [p.rotate(axis, angle, origin) for p in self.wall_border.points]
         rotated_border_loop = Loop(rotated_border_points)
-
         rotated_opening_loops = []
         for opening_loop in self.openings:
             rotated_opening_points = [p.rotate(axis, angle, origin) for p in opening_loop.points]
@@ -54,6 +59,11 @@ class Wall(Face):
             rotated_opening_loops.append(rotated_opening_loop)
 
         return Wall(rotated_border_loop, rotated_opening_loops, self.wall_type, self.thickness)
+
+
+    def convert_to_shade(self):
+        face = HB_Face3D([LB_Point3D(p.x, p.y, p.z) for p in self.outer_loop.points])
+        return HB_Shade(generate_random_string(10), face)
 
 
     @functools.cached_property

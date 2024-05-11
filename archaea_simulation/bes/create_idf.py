@@ -9,6 +9,7 @@ from honeybee_energy.simulation.runperiod import RunPeriod
 from honeybee_energy.simulation.shadowcalculation import ShadowCalculation
 from honeybee.model import Model
 from honeybee.room import Room
+from honeybee.shade import Shade
 from honeybee_energy.simulation.parameter import SimulationParameter
 from honeybee_energy.lib.programtypes import office_program
 from honeybee_energy.hvac.idealair import IdealAirSystem
@@ -23,12 +24,14 @@ version_string
 from archaea_simulation.bes.schedule.generator import sequential_compact_schedule_generator
 from ladybug.futil import preparedir, nukedir
 from honeybee_energy.measure import Measure
+from honeybee.shade import Shade
 
 
-def create_idf(thermal_rooms: "list[Room]", case_folder: str, case_name: str, ddy_file_path: str, epw_file_path: str):
+def create_idf(thermal_rooms: "list[Room]", shades : "list[Shade]", case_folder: str, case_name: str, ddy_file_path: str, epw_file_path: str):
     adj_info = Room.solve_adjacency(thermal_rooms)
     # Get input Model
-    model: Model = Model('archeae_bes', thermal_rooms)
+
+    model: Model = Model('archeae_bes', thermal_rooms, orphaned_shades=shades)
     model.tolerance = 0.0001
     model.units = 'Meters'
 

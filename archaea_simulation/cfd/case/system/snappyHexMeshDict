@@ -25,15 +25,9 @@ geometry
 
     // context meshes to replace
 
-    // refinement mesh to replace
+    // refinement mesh 1 to replace
 
-    // refinementBox
-    // {
-    //     type searchableBox;
-    //     min  (  0   0   0);
-    //     max  (50   50  10);
-    // }
-
+    // refinement mesh 2 to replace
 };
 
 castellatedMeshControls
@@ -44,7 +38,9 @@ castellatedMeshControls
 
         // context meshes features to replace
 
-        // refinement mesh features to replace
+        // refinement mesh 1 features to replace
+
+        // refinement mesh 2 features to replace
     );
 
     refinementSurfaces
@@ -56,13 +52,9 @@ castellatedMeshControls
 
     refinementRegions
     {
-        // refinement mesh refinementRegions to replace
-        
-        // refinementBox
-        // {
-        //     mode    inside;
-        //     level   2;
-        // }
+        // refinement mesh 1 refinementRegions to replace
+
+        // refinement mesh 2 refinementRegions to replace
     }
 
     // location in mesh to replace

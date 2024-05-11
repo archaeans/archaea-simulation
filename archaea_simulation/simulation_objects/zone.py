@@ -1,5 +1,6 @@
 from archaea.geometry.face import Face
 from archaea.geometry.vector3d import Vector3d
+from archaea.geometry.point3d import Point3d
 from archaea_simulation.simulation_objects.wall import Wall
 from archaea_simulation.simulation_objects.wall_type import WallType
 from archaea_simulation.simulation_objects.thermal_zone import ThermalZone
@@ -26,15 +27,24 @@ class Zone:
     volume: float
     wall_default_thickness: float
     openings: "list[Face]"
+    is_first_storey: bool
+    is_last_storey: bool
 
-    def __init__(self, floor: Face, height, walls=None, wall_default_thickness=0.1):
+    def __init__(self, floor: Face, height, is_first_storey: bool, is_last_storey: bool, walls=None, wall_default_thickness=0.1):
         self.floor = Wall(floor.outer_loop, floor.inner_loops)
-        self.floor.update_wall_type(WallType.OUTER)
+        self.is_first_storey = is_first_storey
+        self.is_last_storey = is_last_storey
+        if not is_first_storey:
+            self.floor.update_wall_type(WallType.INNER) 
         self.height = height
         self.wall_default_thickness = wall_default_thickness
         self.volume = self.floor.area * height
         move_vector = Vector3d(0, 0, self.height)
-        self.ceiling = self.floor.move(move_vector).reverse() 
+        self.ceiling = self.floor.move(move_vector).reverse()
+        if is_last_storey:
+            self.ceiling.update_wall_type(WallType.OUTER)
+        else:
+            self.ceiling.update_wall_type(WallType.INNER)
         if walls is None:
             self.create_walls(move_vector)
         else:
@@ -67,7 +77,7 @@ class Zone:
     def rotate(self, axis, angle, origin=None):
         rotated_floor = self.floor.rotate(axis, angle, origin)
         rotated_walls = [wall.rotate(axis, angle, origin) for wall in self.walls]
-        return Zone(rotated_floor, self.height, rotated_walls, self.wall_default_thickness)
+        return Zone(rotated_floor, self.height, self.is_first_storey, self.is_last_storey, rotated_walls, self.wall_default_thickness)
 
     def convert_to_thermal_zone(self, identifier: str):
         HB_faces = []
@@ -88,3 +98,9 @@ class Zone:
                     HB_wall.add_aperture(HB_opening)
             HB_faces.append(HB_wall)
         return ThermalZone(identifier, HB_faces)
+    
+    def all_points(self) -> "list[Point3d]":
+        points = []
+        for wall in self.walls:
+            points += wall.outer_loop.points
+        return points
