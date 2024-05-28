@@ -13,7 +13,7 @@ Preparation of these scenario files done by geometric [Archaea](https://github.c
 
 - OpenFOAM: OpenFOAM requires stl geometries to run it's solvers
 behind the scenes. (Pre-Alpha)
-- EnergyPlus: EnergyPlus requires idf schema to run simulations via LadybugTools. (MVP)
+- EnergyPlus: EnergyPlus requires idf schema to run simulations. It happen via LadybugTools. (MVP)
 - UWG: Urban weather generator is a solver to calculate effects on urban microclimate.
 It creates new .epw file for EnergyPlus simulations.
 
